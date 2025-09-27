@@ -1,0 +1,28 @@
+name: Cleanup Development Documentation
+
+on:
+  schedule:
+    # 매일 자정에 실행 (UTC)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cleanup old dev branches
+        run: |
+          # 30일 이상 된 개발 브랜치 문서 삭제
+          find services/*/dev-branches -type d -name "*" -mtime +30 -exec rm -rf {} + 2>/dev/null || true
+          
+          # 변경사항이 있으면 커밋
+          if [[ -n $(git status --porcelain) ]]; then
+            git config user.name "GitHub Actions Bot"
+            git config user.email "actions@github.com"
+            git add .
+            git commit -m "🧹 Auto-cleanup: Remove development documentation older than 7 days"
+            git push
+          fi

@@ -1,0 +1,120 @@
+name: Process Incoming OpenAPI Specs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'incoming/**'
+
+jobs:
+  process-specs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout apidocs repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: |
+        npm install -g @redocly/cli
+        npm install js-yaml
+
+    - name: Process all incoming specs
+      run: |
+        echo "🔍 Searching for new incoming specs..."
+
+        # incoming 디렉토리에서 새로운 스펙 파일 찾기
+        find incoming -name ".trigger" 2>/dev/null | while read trigger_file; do
+
+          SPEC_DIR=$(dirname "$trigger_file")
+          SERVICE_METADATA="$SPEC_DIR/service-metadata.json"
+
+          if [[ -f "$SERVICE_METADATA" ]]; then
+            # 메타데이터에서 정보 추출
+            SERVICE_NAME=$(cat "$SERVICE_METADATA" | jq -r '.service_name')
+            VERSION=$(cat "$SERVICE_METADATA" | jq -r '.version')
+            DEPLOY_TYPE=$(cat "$SERVICE_METADATA" | jq -r '.deploy_type')
+            GENERATED_AT=$(cat "$SERVICE_METADATA" | jq -r '.generated_at')
+
+            echo "🔄 Processing $SERVICE_NAME $VERSION ($DEPLOY_TYPE)"
+
+            # 대상 디렉토리 결정
+            if [[ "$DEPLOY_TYPE" == "release" ]]; then
+              TARGET_DIR="services/$SERVICE_NAME/versions/$VERSION"
+            else
+              TARGET_DIR="services/$SERVICE_NAME/dev-branches/$VERSION"
+            fi
+
+            # 이전 버전과 변경사항 비교 (중앙집중식!)
+            echo "🔍 Detecting changes for $SERVICE_NAME $VERSION"
+            bash scripts/detect-and-analyze-changes.sh "$SERVICE_NAME" "$SPEC_DIR" "$TARGET_DIR" || echo "Change detection failed, continuing..."
+
+            # 스펙 파일 이동
+            echo "📁 Moving files to $TARGET_DIR"
+            mkdir -p "$TARGET_DIR"
+            cp "$SPEC_DIR"/*.yaml "$TARGET_DIR/" 2>/dev/null || echo "No YAML files to copy"
+            cp "$SPEC_DIR"/*.json "$TARGET_DIR/" 2>/dev/null || echo "No JSON files to copy"
+            cp "$SERVICE_METADATA" "$TARGET_DIR/"
+
+            # HTML 문서 생성
+            echo "🎨 Generating HTML documentation"
+            bash scripts/generate-html-docs.sh "$TARGET_DIR" || echo "HTML generation failed, continuing..."
+
+            # latest 링크 업데이트 (릴리스인 경우)
+            if [[ "$DEPLOY_TYPE" == "release" ]]; then
+              echo "🔗 Updating latest link for $SERVICE_NAME"
+              rm -rf "services/$SERVICE_NAME/latest"
+              mkdir -p "services/$SERVICE_NAME"
+              ln -sf "versions/$VERSION" "services/$SERVICE_NAME/latest"
+            fi
+
+            # 처리 완료된 incoming 파일 제거
+            echo "🧹 Cleaning up incoming files"
+            rm -rf "$SPEC_DIR"
+
+            echo "✅ Completed processing $SERVICE_NAME $VERSION"
+          else
+            echo "⚠️  No service metadata found in $SPEC_DIR"
+          fi
+        done
+
+    - name: Update version timeline
+      run: |
+        echo "📊 Updating version timeline"
+        # 전체 서비스의 버전 타임라인 업데이트 (추후 구현)
+        # node scripts/update-version-timeline.js
+        echo "Version timeline update will be implemented in Phase 2"
+
+    - name: Commit processed documentation
+      run: |
+        git config user.name "GitHub Actions Bot (apidocs)"
+        git config user.email "actions@github.com"
+
+        if [[ -n $(git status --porcelain) ]]; then
+          git add .
+          git commit -m "📚 Process and deploy documentation updates
+
+          - Generated HTML from incoming OpenAPI specs
+          - Updated service documentation and latest links
+          - Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push
+
+          echo "✅ Documentation successfully processed and deployed"
+        else
+          echo "ℹ️  No documentation changes to commit"
+        fi
+
+    - name: Output processing results
+      run: |
+        echo "🎉 Incoming specs processing completed!"
+        echo ""
+        echo "📊 Current services:"
+        find services -name "index.html" | head -10 | while read doc; do
+          service_path=$(echo "$doc" | sed 's|/index.html||')
+          echo "  📚 https://wishandcheers.github.io/apidocs/$service_path/"
+        done

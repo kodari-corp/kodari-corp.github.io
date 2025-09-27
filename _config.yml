@@ -1,0 +1,34 @@
+# Jekyll 설정 (GitHub Pages용)
+title: "Bandi API Documentation"
+description: "Comprehensive API documentation for all Bandi services"
+
+# GitHub Pages 설정
+remote_theme: null
+plugins: []
+
+# 파일 처리 설정
+include:
+  - "_*"
+  - ".htaccess"
+  - ".nojekyll"
+
+exclude:
+  - "README.md"
+  - "node_modules"
+  - "scripts"
+  - "*.md"
+
+# MIME 타입 설정
+defaults:
+  - scope:
+      path: "**/*.yaml"
+    values:
+      layout: null
+  - scope:
+      path: "**/*.yml"
+    values:
+      layout: null
+  - scope:
+      path: "**/*.json"
+    values:
+      layout: null

@@ -325,6 +325,13 @@ class ChangeDetector {
             }
         };
 
+        // 디렉토리가 없으면 생성
+        const outputDir = path.dirname(outputPath);
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+            console.log(`📁 디렉토리 생성됨: ${outputDir}`);
+        }
+
         fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
         console.log(`\n💾 리포트 저장됨: ${outputPath}`);
     }

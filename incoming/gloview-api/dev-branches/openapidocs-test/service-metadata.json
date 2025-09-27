@@ -1,0 +1,10 @@
+{
+  "service_name": "gloview-api",
+  "version": "openapidocs-test",
+  "deploy_type": "development",
+  "generated_at": "2025-09-27T12:43:59Z",
+  "commit_sha": "dc7146f728943d6b2e2a0f808858811ad535bf82",
+  "source_repo": "wishandcheers/gloview",
+  "branch": "main",
+  "source_url": "https://github.com/wishandcheers/gloview/commit/dc7146f728943d6b2e2a0f808858811ad535bf82"
+}

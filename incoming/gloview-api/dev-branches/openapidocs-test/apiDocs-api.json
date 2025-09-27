@@ -1,0 +1,2153 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GlowView API",
+    "description": "# API Guide\nThis is a Api alpha-server for GloView App.\n\n## Common Rules\n- 인증이 필요한 API는 `Authorization: Bearer {id_token}` 헤더를 포함해야 합니다.\n\n## CDN Guide\n- CDN URL 형식: `https://{cdn_host}/{path}`\n    - cdn_host: `gloview-alpha-cdn.duckdns.org`\n- Original URL path: `/origin/{file_path}`\n    - ex: https://gloview-alpha-cdn.duckdns.org/origin/times_square.jpg\n- Thumbnail URL path: /thumb/{file_path}?w\u003d{size}\n    - Thumbnail URL의 경우 QueryString 없이 내려감\n    - size: 썸네일 크기\n    - ex: https://gloview-alpha-cdn.duckdns.org/thumb/gloview-alpha/times_square.jpg?w\u003d200\n",
+    "version": "0.4.0"
+  },
+  "servers": [
+    {
+      "url": "https://gloview-alpha.duckdns.org",
+      "description": "Development server"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "개인 사진",
+      "description": "개인 사진 관리 API (인증 필요)"
+    },
+    {
+      "name": "사진 (Deprecated)",
+      "description": "기존 사진 API - 하위 호환성 유지"
+    },
+    {
+      "name": "공개 사진",
+      "description": "공개 사진 브라우징 API (인증 불필요)"
+    },
+    {
+      "name": "인증",
+      "description": "사용자 인증 관련 API"
+    },
+    {
+      "name": "임시저장 사진",
+      "description": "임시저장 사진 워크플로우 API (소유자 권한)"
+    },
+    {
+      "name": "해시태그",
+      "description": "해시태그 관련 API"
+    }
+  ],
+  "paths": {
+    "/api/signup": {
+      "post": {
+        "tags": [
+          "인증"
+        ],
+        "summary": "사용자 등록",
+        "description": "현재 인증된 사용자의 프로필 정보를 등록합니다.",
+        "operationId": "signup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSignUpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "사용자 등록 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseUnit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/drafts/{id}/publish": {
+      "post": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 임시저장 사진 발행",
+        "description": "임시저장 사진을 발행된 사진으로 변환합니다. /api/my/drafts/{id}/publish로 이동 권장",
+        "operationId": "publishDraftPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/drafts/{id}/publish": {
+      "post": {
+        "tags": [
+          "임시저장 사진"
+        ],
+        "summary": "임시저장 사진 발행",
+        "description": "임시저장 사진을 발행된 사진으로 변환합니다. 모든 필수 필드가 입력되어야 합니다.",
+        "operationId": "publishDraftPhoto_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "임시저장 사진 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "발행 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/{id}": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 발행된 사진 상세 조회",
+        "description": "특정 발행된 사진의 상세 정보를 조회합니다. /api/my/photos/{id}로 이동 권장",
+        "operationId": "getPublishedPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePublishedPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 발행된 사진 삭제",
+        "description": "발행된 사진을 삭제합니다 (소프트 삭제). /api/my/photos/{id}로 이동 권장",
+        "operationId": "deletePublishedPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDeletePhotoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 발행된 사진 수정",
+        "description": "발행된 사진의 메타데이터를 수정합니다. /api/my/photos/{id}로 이동 권장",
+        "operationId": "updatePublishedPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePublishedPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePublishedPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/drafts/{id}": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 임시저장 사진 상세 조회",
+        "description": "특정 임시저장 사진의 상세 정보를 조회합니다. /api/my/drafts/{id}로 이동 권장",
+        "operationId": "getDraftPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDraftPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 임시저장 사진 수정",
+        "description": "임시저장 사진의 메타데이터를 수정합니다. /api/my/drafts/{id}로 이동 권장",
+        "operationId": "updateDraftPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDraftPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDraftPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/photos/{id}": {
+      "get": {
+        "tags": [
+          "개인 사진"
+        ],
+        "summary": "발행된 사진 상세 조회",
+        "description": "특정 발행된 사진의 상세 정보를 조회합니다. 사진 소유자만 조회 가능합니다.",
+        "operationId": "getPublishedPhoto_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "발행된 사진 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePublishedPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "개인 사진"
+        ],
+        "summary": "발행된 사진 삭제",
+        "description": "발행된 사진을 삭제합니다 (소프트 삭제). 사진 소유자만 삭제 가능합니다.",
+        "operationId": "deletePublishedPhoto_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "발행된 사진 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "삭제 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDeletePhotoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "개인 사진"
+        ],
+        "summary": "발행된 사진 수정",
+        "description": "발행된 사진의 메타데이터를 수정합니다. 사진 소유자만 수정 가능합니다.",
+        "operationId": "updatePublishedPhoto_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "발행된 사진 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePublishedPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "수정 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePublishedPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/drafts/{id}": {
+      "get": {
+        "tags": [
+          "임시저장 사진"
+        ],
+        "summary": "임시저장 사진 상세 조회",
+        "description": "특정 임시저장 사진의 상세 정보를 조회합니다. 유효성 검사 결과도 포함됩니다.",
+        "operationId": "getDraftPhoto_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "임시저장 사진 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDraftPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "임시저장 사진"
+        ],
+        "summary": "임시저장 사진 수정",
+        "description": "임시저장 사진의 메타데이터를 수정합니다. 필수 필드를 모두 채우면 발행 가능한 상태가 됩니다.",
+        "operationId": "updateDraftPhoto_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "임시저장 사진 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDraftPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "수정 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDraftPhotoDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/photos": {
+      "get": {
+        "tags": [
+          "공개 사진"
+        ],
+        "summary": "지역 내 사진 목록 조회",
+        "description": "지정된 영역(BoundingBox) 내의 사진 목록을 조회합니다.",
+        "operationId": "getPhotos",
+        "parameters": [
+          {
+            "name": "boundingBox",
+            "in": "query",
+            "description": "조회할 영역(범위)",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BoundingBox"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "정렬 옵션",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "VIEW_COUNT_DESC",
+              "enum": [
+                "LIKE_COUNT_ASC",
+                "LIKE_COUNT_DESC",
+                "VIEW_COUNT_ASC",
+                "VIEW_COUNT_DESC"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/photos/clusters": {
+      "get": {
+        "tags": [
+          "공개 사진"
+        ],
+        "summary": "사진 클러스터 조회",
+        "description": "지도에 표시할 사진 클러스터를 조회합니다.",
+        "operationId": "getPhotoClusters",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "description": "클러스터 조회 요청 파라미터",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PhotoClusterRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "클러스터 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotoClustersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/photos/cluster-area": {
+      "get": {
+        "tags": [
+          "공개 사진"
+        ],
+        "summary": "클러스터 영역 내 사진 목록 조회",
+        "description": "지정된 클러스터 영역(중심점 + 반지름) 내의 모든 사진을 조회합니다.",
+        "operationId": "getPhotosInClusterArea",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "description": "클러스터 영역 조회 요청 파라미터",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ClusterAreaRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/profile": {
+      "get": {
+        "tags": [
+          "인증"
+        ],
+        "summary": "사용자 프로필 조회",
+        "description": "현재 인증된 사용자의 프로필 정보를 조회합니다.",
+        "operationId": "profile",
+        "responses": {
+          "200": {
+            "description": "프로필 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseUserProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 지역 내 사진 목록 조회",
+        "description": "지정된 영역(BoundingBox) 내의 사진 목록을 조회합니다. PublicPhotoController로 이동 권장",
+        "operationId": "getPhotos_1",
+        "parameters": [
+          {
+            "name": "boundingBox",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BoundingBox"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "VIEW_COUNT_DESC",
+              "enum": [
+                "LIKE_COUNT_ASC",
+                "LIKE_COUNT_DESC",
+                "VIEW_COUNT_ASC",
+                "VIEW_COUNT_DESC"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/my": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 업로드 사진 조회",
+        "description": "내가 업로드한 사진들을 조회합니다. /api/my/photos로 이동 권장",
+        "operationId": "getMyPhotos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseMyPhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/my/published": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 발행된 사진 목록 조회",
+        "description": "내가 업로드한 발행된 사진들을 커서 기반 페이징으로 조회합니다. /api/my/photos/published로 이동 권장",
+        "operationId": "getMyPublishedPhotos",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CursorPhotosRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePublishedPhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/my/drafts": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 임시저장 사진 목록 조회",
+        "description": "내가 업로드한 임시저장 사진들을 커서 기반 페이징으로 조회합니다. /api/my/drafts로 이동 권장",
+        "operationId": "getMyDraftPhotos",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CursorPhotosRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDraftPhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/clusters": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 사진 클러스터 조회",
+        "description": "지도에 표시할 사진 클러스터를 조회합니다. PublicPhotoController로 이동 권장",
+        "operationId": "getPhotoClusters_1",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PhotoClusterRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotoClustersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/cluster-area": {
+      "get": {
+        "tags": [
+          "사진 (Deprecated)"
+        ],
+        "summary": "[Deprecated] 클러스터 영역 내 사진 목록 조회",
+        "description": "지정된 클러스터 영역(중심점 + 반지름) 내의 모든 사진을 조회합니다. PublicPhotoController로 이동 권장",
+        "operationId": "getPhotosInClusterArea_1",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ClusterAreaRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/photos": {
+      "get": {
+        "tags": [
+          "개인 사진"
+        ],
+        "summary": "업로드 사진 조회 (기존 API)",
+        "description": "내가 업로드한 사진들을 조회합니다. (하위 호환성을 위한 기존 API)",
+        "operationId": "getMyPhotos_1",
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseMyPhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/photos/published": {
+      "get": {
+        "tags": [
+          "개인 사진"
+        ],
+        "summary": "발행된 사진 목록 조회",
+        "description": "내가 업로드한 발행된 사진들을 커서 기반 페이징으로 조회합니다.",
+        "operationId": "getMyPublishedPhotos_1",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "description": "커서 기반 페이지네이션 파라미터",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CursorPhotosRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePublishedPhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/drafts": {
+      "get": {
+        "tags": [
+          "임시저장 사진"
+        ],
+        "summary": "임시저장 사진 목록 조회",
+        "description": "내가 업로드한 임시저장 사진들을 커서 기반 페이징으로 조회합니다.",
+        "operationId": "getMyDraftPhotos_1",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "description": "커서 기반 페이지네이션 파라미터",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CursorPhotosRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseDraftPhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hashtags": {
+      "get": {
+        "tags": [
+          "해시태그"
+        ],
+        "summary": "해시태그 검색",
+        "description": "키워드를 포함하는 해시태그를 검색합니다.",
+        "operationId": "searchHashtags",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SearchHashtagRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseSearchHashtagResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hashtags/{name}": {
+      "get": {
+        "tags": [
+          "해시태그"
+        ],
+        "summary": "해시태그 이름으로 조회",
+        "description": "주어진 이름과 정확히 일치하는 해시태그를 조회합니다.",
+        "operationId": "findByName",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "조회할 해시태그 이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseHashtagResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hashtags/top10": {
+      "get": {
+        "tags": [
+          "해시태그"
+        ],
+        "summary": "사용량 기준 상위 10개 해시태그 조회",
+        "description": "가장 많이 사용된 해시태그 10개를 조회합니다.",
+        "operationId": "top10ByUsageCount",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseTop10HashtagsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/signout": {
+      "delete": {
+        "tags": [
+          "인증"
+        ],
+        "summary": "사용자 탈퇴",
+        "description": "현재 인증된 사용자의 프로필 정보를 삭제합니다. (개발용)",
+        "operationId": "signout",
+        "responses": {
+          "200": {
+            "description": "사용자 탈퇴 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseUnit"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserSignUpRequest": {
+        "type": "object",
+        "description": "사용자 등록 요청 정보",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "UNKNOWN"
+            ]
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date"
+          },
+          "bio": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname"
+        ]
+      },
+      "BaseResponseUnit": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "ResponseHeader": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "success"
+        ]
+      },
+      "BaseResponsePhotoResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/PhotoResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "Gps": {
+        "type": "object",
+        "properties": {
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "direction": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "PhotoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "SPHERICAL_360",
+              "PANORAMA",
+              "VIRTUAL_TOUR"
+            ]
+          },
+          "gps": {
+            "$ref": "#/components/schemas/Gps"
+          },
+          "thumbnail": {
+            "$ref": "#/components/schemas/ThumbnailResponse"
+          }
+        },
+        "required": [
+          "gps",
+          "id",
+          "thumbnail",
+          "type"
+        ]
+      },
+      "ThumbnailResponse": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "photoId",
+          "url"
+        ]
+      },
+      "UpdatePublishedPhotoRequest": {
+        "type": "object",
+        "description": "수정할 사진 정보",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "사진 타입",
+            "enum": [
+              "STANDARD",
+              "SPHERICAL_360",
+              "PANORAMA",
+              "VIRTUAL_TOUR"
+            ],
+            "example": "STANDARD"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "경도",
+            "example": 127.027778,
+            "maximum": 180.0,
+            "minimum": -180.0
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "위도",
+            "example": 37.497778,
+            "maximum": 90.0,
+            "minimum": -90.0
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double",
+            "description": "고도 (미터)",
+            "example": 100.5
+          },
+          "direction": {
+            "type": "number",
+            "format": "double",
+            "description": "방향 (라디안)",
+            "example": 1.57,
+            "maximum": 6.283185307179586,
+            "minimum": 0.0
+          },
+          "description": {
+            "type": "string",
+            "description": "사진 설명",
+            "example": "아름다운 경치",
+            "maxLength": 1000,
+            "minLength": 0
+          },
+          "hashtags": {
+            "type": "array",
+            "description": "해시태그 목록",
+            "example": [
+              "여행",
+              "경치"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 0
+          }
+        }
+      },
+      "BaseResponsePublishedPhotoDetailResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/PublishedPhotoDetailResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "ImageResponse": {
+        "type": "object",
+        "description": "원본 이미지 정보",
+        "properties": {
+          "photoId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사진 ID",
+            "example": 123456789
+          },
+          "url": {
+            "type": "string",
+            "description": "원본 이미지 URL",
+            "example": "https://example.com/images/photo_123456789.jpg"
+          }
+        },
+        "required": [
+          "photoId",
+          "url"
+        ]
+      },
+      "PublishedPhotoDetailResponse": {
+        "type": "object",
+        "description": "발행된 사진 상세 정보 응답",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사진 ID",
+            "example": 123456789
+          },
+          "type": {
+            "type": "string",
+            "description": "사진 타입",
+            "enum": [
+              "STANDARD",
+              "SPHERICAL_360",
+              "PANORAMA",
+              "VIRTUAL_TOUR"
+            ],
+            "example": "STANDARD"
+          },
+          "gps": {
+            "$ref": "#/components/schemas/Gps",
+            "description": "위치 정보"
+          },
+          "description": {
+            "type": "string",
+            "description": "사진 설명",
+            "example": "아름다운 경치"
+          },
+          "hashtags": {
+            "type": "array",
+            "description": "해시태그 목록",
+            "example": [
+              "여행",
+              "경치"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "image": {
+            "$ref": "#/components/schemas/ImageResponse",
+            "description": "원본 이미지 정보"
+          },
+          "createdAtEpochMilli": {
+            "type": "integer",
+            "format": "int64",
+            "description": "생성 시각 (epochMilli)",
+            "example": 1630000000000
+          },
+          "updatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64",
+            "description": "수정 시각 (epochMilli)",
+            "example": 1630000000000
+          }
+        },
+        "required": [
+          "createdAtEpochMilli",
+          "gps",
+          "hashtags",
+          "id",
+          "image",
+          "type",
+          "updatedAtEpochMilli"
+        ]
+      },
+      "UpdateDraftPhotoRequest": {
+        "type": "object",
+        "description": "수정할 사진 정보",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "사진 타입",
+            "enum": [
+              "STANDARD",
+              "SPHERICAL_360",
+              "PANORAMA",
+              "VIRTUAL_TOUR"
+            ],
+            "example": "STANDARD"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "경도",
+            "example": 127.027778,
+            "maximum": 180.0,
+            "minimum": -180.0
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "위도",
+            "example": 37.497778,
+            "maximum": 90.0,
+            "minimum": -90.0
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double",
+            "description": "고도 (미터)",
+            "example": 100.5
+          },
+          "direction": {
+            "type": "number",
+            "format": "double",
+            "description": "방향 (라디안)",
+            "example": 1.57,
+            "maximum": 6.283185307179586,
+            "minimum": 0.0
+          },
+          "description": {
+            "type": "string",
+            "description": "사진 설명",
+            "example": "아름다운 경치",
+            "maxLength": 1000,
+            "minLength": 0
+          },
+          "hashtags": {
+            "type": "array",
+            "description": "해시태그 목록",
+            "example": [
+              "여행",
+              "경치"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 0
+          }
+        }
+      },
+      "BaseResponseDraftPhotoDetailResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/DraftPhotoDetailResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "DraftPhotoDetailResponse": {
+        "type": "object",
+        "description": "임시저장 사진 상세 정보 응답",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사진 ID",
+            "example": 123456789
+          },
+          "type": {
+            "type": "string",
+            "description": "사진 타입",
+            "enum": [
+              "STANDARD",
+              "SPHERICAL_360",
+              "PANORAMA",
+              "VIRTUAL_TOUR"
+            ],
+            "example": "STANDARD"
+          },
+          "gps": {
+            "$ref": "#/components/schemas/Gps",
+            "description": "위치 정보"
+          },
+          "description": {
+            "type": "string",
+            "description": "사진 설명",
+            "example": "아름다운 경치"
+          },
+          "hashtags": {
+            "type": "array",
+            "description": "해시태그 목록",
+            "example": [
+              "여행",
+              "경치"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "image": {
+            "$ref": "#/components/schemas/ImageResponse",
+            "description": "원본 이미지 정보"
+          },
+          "canBePublished": {
+            "type": "boolean",
+            "description": "발행 가능 여부",
+            "example": false
+          },
+          "validationErrors": {
+            "type": "array",
+            "description": "유효성 검사 오류 목록",
+            "example": [
+              "Location is required for published photos"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAtEpochMilli": {
+            "type": "integer",
+            "format": "int64",
+            "description": "생성 시각 (epochMilli)",
+            "example": 1630000000000
+          },
+          "updatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64",
+            "description": "수정 시각 (epochMilli)",
+            "example": 1630000000000
+          }
+        },
+        "required": [
+          "canBePublished",
+          "createdAtEpochMilli",
+          "hashtags",
+          "id",
+          "image",
+          "type",
+          "updatedAtEpochMilli",
+          "validationErrors"
+        ]
+      },
+      "BoundingBox": {
+        "type": "object",
+        "properties": {
+          "minLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "minLng": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxLng": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": [
+          "maxLat",
+          "maxLng",
+          "minLat",
+          "minLng"
+        ]
+      },
+      "BaseResponsePhotosResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/PhotosResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "PhotosResponse": {
+        "type": "object",
+        "properties": {
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoResponse"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "generatedAtEpochMilli",
+          "photos",
+          "totalCount"
+        ]
+      },
+      "PhotoClusterRequest": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "searchDistance": {
+            "type": "number",
+            "format": "double"
+          },
+          "clusterDistance": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": [
+          "clusterDistance",
+          "latitude",
+          "longitude",
+          "searchDistance"
+        ]
+      },
+      "BaseResponsePhotoClustersResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/PhotoClustersResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "PhotoClusterResponse": {
+        "type": "object",
+        "properties": {
+          "center": {
+            "$ref": "#/components/schemas/Gps"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgDistanceMeters": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxDistanceMeters": {
+            "type": "number",
+            "format": "double"
+          },
+          "thumbnail": {
+            "$ref": "#/components/schemas/ThumbnailResponse"
+          }
+        },
+        "required": [
+          "avgDistanceMeters",
+          "center",
+          "count",
+          "maxDistanceMeters",
+          "thumbnail"
+        ]
+      },
+      "PhotoClustersResponse": {
+        "type": "object",
+        "properties": {
+          "clusters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoClusterResponse"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "clusters",
+          "generatedAtEpochMilli",
+          "totalCount"
+        ]
+      },
+      "ClusterAreaRequest": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "radius": {
+            "type": "number",
+            "format": "double"
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "DISTANCE_ASC",
+              "DISTANCE_DESC",
+              "LIKE_COUNT_ASC",
+              "LIKE_COUNT_DESC",
+              "VIEW_COUNT_ASC",
+              "VIEW_COUNT_DESC"
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "radius",
+          "size",
+          "sort"
+        ]
+      },
+      "BaseResponseUserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/UserProfileResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "ProfileResponse": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "UNKNOWN"
+            ]
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date"
+          },
+          "bio": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname"
+        ]
+      },
+      "UserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "email": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ProfileResponse"
+          },
+          "isRegistered": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "isRegistered"
+        ]
+      },
+      "BaseResponseMyPhotosResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/MyPhotosResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "DraftPhotoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "SPHERICAL_360",
+              "PANORAMA",
+              "VIRTUAL_TOUR"
+            ]
+          },
+          "gps": {
+            "$ref": "#/components/schemas/Gps"
+          },
+          "thumbnail": {
+            "$ref": "#/components/schemas/ThumbnailResponse"
+          }
+        },
+        "required": [
+          "id",
+          "thumbnail",
+          "type"
+        ]
+      },
+      "MyPhotosResponse": {
+        "type": "object",
+        "properties": {
+          "publishPhotos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoResponse"
+            }
+          },
+          "draftPhotos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftPhotoResponse"
+            }
+          },
+          "generatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "draftPhotos",
+          "generatedAtEpochMilli",
+          "publishPhotos"
+        ]
+      },
+      "CursorPhotosRequest": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "FORWARD",
+              "BACKWARD"
+            ]
+          }
+        },
+        "required": [
+          "direction",
+          "size"
+        ]
+      },
+      "BaseResponsePublishedPhotosResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/PublishedPhotosResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "PageCursorResponse": {
+        "type": "object",
+        "description": "페이지네이션 커서 정보",
+        "properties": {
+          "hasNext": {
+            "type": "boolean",
+            "description": "다음 페이지 존재 여부"
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "description": "이전 페이지 존재 여부"
+          },
+          "nextCursor": {
+            "type": "string",
+            "description": "다음 페이지 커서"
+          },
+          "prevCursor": {
+            "type": "string",
+            "description": "이전 페이지 커서"
+          }
+        },
+        "required": [
+          "hasNext",
+          "hasPrev"
+        ]
+      },
+      "PublishedPhotosResponse": {
+        "type": "object",
+        "description": "발행된 사진 목록 응답",
+        "properties": {
+          "photos": {
+            "type": "array",
+            "description": "사진 목록",
+            "items": {
+              "$ref": "#/components/schemas/PhotoResponse"
+            }
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/PageCursorResponse",
+            "description": "페이지네이션 정보"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "전체 개수 (선택적)"
+          },
+          "generatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64",
+            "description": "생성 시각 (epochMilli)"
+          }
+        },
+        "required": [
+          "cursor",
+          "generatedAtEpochMilli",
+          "photos"
+        ]
+      },
+      "BaseResponseDraftPhotosResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/DraftPhotosResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "DraftPhotosResponse": {
+        "type": "object",
+        "description": "임시저장 사진 목록 응답",
+        "properties": {
+          "photos": {
+            "type": "array",
+            "description": "임시저장 사진 목록",
+            "items": {
+              "$ref": "#/components/schemas/DraftPhotoResponse"
+            }
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/PageCursorResponse",
+            "description": "페이지네이션 정보"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "전체 개수 (선택적)"
+          },
+          "generatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64",
+            "description": "생성 시각 (epochMilli)"
+          }
+        },
+        "required": [
+          "cursor",
+          "generatedAtEpochMilli",
+          "photos"
+        ]
+      },
+      "SearchHashtagRequest": {
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 3
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 20
+          }
+        },
+        "required": [
+          "keyword"
+        ]
+      },
+      "BaseResponseSearchHashtagResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/SearchHashtagResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "HashtagResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "usageCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "name",
+          "usageCount"
+        ]
+      },
+      "SearchHashtagResponse": {
+        "type": "object",
+        "properties": {
+          "hashtags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HashtagResponse"
+            }
+          }
+        },
+        "required": [
+          "hashtags"
+        ]
+      },
+      "BaseResponseHashtagResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/HashtagResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "BaseResponseTop10HashtagsResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/Top10HashtagsResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "Top10HashtagsResponse": {
+        "type": "object",
+        "properties": {
+          "hashtags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HashtagResponse"
+            }
+          }
+        },
+        "required": [
+          "hashtags"
+        ]
+      },
+      "BaseResponseDeletePhotoResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/DeletePhotoResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "DeletePhotoResponse": {
+        "type": "object",
+        "description": "사진 삭제 응답",
+        "properties": {
+          "photoId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "삭제된 사진 ID",
+            "example": 123456789
+          },
+          "success": {
+            "type": "boolean",
+            "description": "삭제 성공 여부",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "삭제 메시지",
+            "example": "사진이 성공적으로 삭제되었습니다"
+          }
+        },
+        "required": [
+          "message",
+          "photoId",
+          "success"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "openIdScheme": {
+        "type": "openIdConnect",
+        "description": "OpenID Connect 인증",
+        "in": "header",
+        "scheme": "bearer",
+        "bearerFormat": "JWT ID Token",
+        "openIdConnectUrl": "https://accounts.google.com/.well-known/openid-configuration"
+      }
+    }
+  }
+}

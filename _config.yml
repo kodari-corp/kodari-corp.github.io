@@ -1,6 +1,6 @@
 # Jekyll 설정 (GitHub Pages용)
-title: "Bandi API Documentation"
-description: "Comprehensive API documentation for all Bandi services"
+title: "GloView API Documentation"
+description: "Comprehensive API documentation for all GloView services"
 
 # GitHub Pages 설정
 remote_theme: null

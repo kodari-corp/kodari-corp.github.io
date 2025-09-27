@@ -9,6 +9,8 @@ on:
 jobs:
   process-specs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout apidocs repository

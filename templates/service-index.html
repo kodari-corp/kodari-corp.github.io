@@ -494,9 +494,15 @@
                             ${version.changes.risk_level.toUpperCase()}
                         </span>
                         <a href="./versions/${version.version}/"
-                           style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
-                            View Docs →
+                           style="color: var(--primary-color); text-decoration: none; font-weight: 500; margin-right: 15px;">
+                            📖 View Docs
                         </a>
+                        ${version.changes.new_endpoints > 0 || version.changes.modified_endpoints > 0 || version.changes.breaking_changes > 0 ? `
+                        <a href="./versions/${version.version}/#changeSummary"
+                           style="color: #2e7d32; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                            🔍 Changes Detail →
+                        </a>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');

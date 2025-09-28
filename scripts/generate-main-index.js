@@ -262,7 +262,7 @@ class MainIndexGenerator {
         }
 
         links.push(
-            '<a href="https://github.com/wishandcheers/gloview">🔗 Source Code</a>',
+            '<a href="https://github.com/kodari-corp/gloview">🔗 Source Code</a>',
             '<a href="changelog.html">📋 Changelog</a>'
         );
 

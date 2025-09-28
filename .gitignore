@@ -506,3 +506,6 @@ Thumbs.db
 *.temp
 
 docs-setup
+
+.serena
+.claude

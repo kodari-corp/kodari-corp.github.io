@@ -141,5 +141,5 @@ jobs:
         echo "📊 Current services:"
         find services -name "index.html" | head -10 | while read doc; do
           service_path=$(echo "$doc" | sed 's|/index.html||')
-          echo "  📚 https://wishandcheers.github.io/apidocs/$service_path/"
+          echo "  📚 https://kodari-corp.github.io/$service_path/"
         done

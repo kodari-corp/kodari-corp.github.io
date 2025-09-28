@@ -45,45 +45,58 @@ for spec_file in *.yaml *.yml *.json; do
         --output "${filename}.html" \
         --title "$SERVICE_NAME API Documentation - ${filename} ($VERSION)"
     else
-      echo "⚠️  Redoc CLI not available - creating basic HTML wrapper"
+      echo "🎨 Using enhanced redoc-template.html"
 
-      # 기본 HTML 래퍼 생성
-      cat > "${filename}.html" << EOF
+      # redoc-template.html 경로 찾기
+      TEMPLATE_PATH="../../../templates/redoc-template.html"
+      if [[ ! -f "$TEMPLATE_PATH" ]]; then
+        TEMPLATE_PATH="../../templates/redoc-template.html"
+      fi
+      if [[ ! -f "$TEMPLATE_PATH" ]]; then
+        TEMPLATE_PATH="../templates/redoc-template.html"
+      fi
+
+      if [[ ! -f "$TEMPLATE_PATH" ]]; then
+        echo "⚠️  redoc-template.html not found, falling back to basic wrapper"
+        # 기본 래퍼 생성 (폴백)
+        cat > "${filename}.html" << EOF
 <!DOCTYPE html>
 <html>
 <head>
     <title>$SERVICE_NAME API Documentation - $filename ($VERSION)</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; }
-        .redoc-container { background: #fafafa; }
     </style>
 </head>
 <body>
     <div id="redoc-container"></div>
-    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+    <script src="https://cdn.redocly.com/redoc/latest/bundles/redoc.standalone.js"></script>
     <script>
-        fetch('$spec_file')
-            .then(response => response.text())
-            .then(spec => {
-                Redoc.init(spec, {
-                    theme: {
-                        colors: {
-                            primary: { main: '#667eea' }
-                        }
-                    }
-                }, document.getElementById('redoc-container'));
-            })
-            .catch(err => {
-                document.getElementById('redoc-container').innerHTML =
-                    '<h1>Error loading API specification</h1><p>' + err.message + '</p>';
-            });
+        Redoc.init('$spec_file', {
+            theme: {
+                colors: { primary: { main: '#667eea' } }
+            }
+        }, document.getElementById('redoc-container'));
     </script>
 </body>
 </html>
 EOF
+      else
+        echo "✨ Applying enhanced template with changes panel"
+
+        # 템플릿에서 변수 치환하여 HTML 생성
+        sed -e "s/{{SERVICE_NAME}}/$SERVICE_NAME/g" \
+            -e "s/{{VERSION}}/$VERSION/g" \
+            -e "s/{{SERVICE_DESCRIPTION}}/API documentation with enhanced change tracking/g" \
+            -e "s/{{SERVICE_LOGO}}/📚/g" \
+            -e "s/{{GENERATED_AT}}/$GENERATED_AT/g" \
+            -e "s/{{CHANGE_SUMMARY_CLASS}}/change-summary/g" \
+            -e "s/{{CHANGE_SUMMARY_TITLE}}/What's New in $VERSION/g" \
+            -e "s/'openapi.json'/'$spec_file'/g" \
+            "$TEMPLATE_PATH" > "${filename}.html"
+      fi
     fi
 
     echo "✅ Generated: ${filename}.html"
@@ -149,4 +162,4 @@ echo "📚 Main documentation: index.html"
 echo "📁 Generated files:"
 ls -la *.html 2>/dev/null || echo "No HTML files found"
 
-return 0
+exit 0

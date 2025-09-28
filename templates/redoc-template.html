@@ -4,7 +4,9 @@
   <title>{{SERVICE_NAME}} API Documentation - {{VERSION}}</title>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet">
 
   <style>
     :root {
@@ -24,8 +26,8 @@
       --text-muted: #868e96;
 
       --border-color: #dee2e6;
-      --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
-      --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);
+      --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
     * {
@@ -70,7 +72,7 @@
     .service-logo {
       width: 48px;
       height: 48px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -105,7 +107,7 @@
       align-items: center;
       gap: 8px;
       padding: 8px 16px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 20px;
       font-weight: 500;
       font-size: 14px;
@@ -268,9 +270,20 @@
       margin-bottom: 8px;
     }
 
-    .change-type.breaking { background: #ffebee; color: #c62828; }
-    .change-type.new { background: #e8f5e8; color: #2e7d2e; }
-    .change-type.modified { background: #fff3e0; color: #ef6c00; }
+    .change-type.breaking {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .change-type.new {
+      background: #e8f5e8;
+      color: #2e7d2e;
+    }
+
+    .change-type.modified {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
 
     /* Version Selector */
     .version-selector {
@@ -457,7 +470,7 @@
 </div>
 
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"></script>
+<script src="https://cdn.redocly.com/redoc/latest/bundles/redoc.standalone.js"></script>
 <script>
   // Enhanced Redoc Configuration
   const redocOptions = {
@@ -517,11 +530,11 @@
     hideSchemaPattern: false,
     generateCodeSamples: {
       languages: [
-        { lang: 'curl', label: 'cURL' },
-        { lang: 'javascript', label: 'JavaScript' },
-        { lang: 'python', label: 'Python' },
-        { lang: 'java', label: 'Java' },
-        { lang: 'kotlin', label: 'Kotlin' }
+        {lang: 'curl', label: 'cURL'},
+        {lang: 'javascript', label: 'JavaScript'},
+        {lang: 'python', label: 'Python'},
+        {lang: 'java', label: 'Java'},
+        {lang: 'kotlin', label: 'Kotlin'}
       ]
     }
   };
@@ -532,64 +545,80 @@
   // Load and display changes
   async function loadChanges() {
     try {
-      const response = await fetch('changes.json');
-      const changes = await response.json();
-      displayChanges(changes);
+      const response = await fetch('changes-report.json');
+      const changesData = await response.json();
+      displayChanges(changesData);
     } catch (error) {
-      console.warn('Could not load changes:', error);
+      console.warn('Could not load changes-report.json:', error);
     }
   }
 
-  function displayChanges(changes) {
+  function displayChanges(changesData) {
     const changeSummary = document.getElementById('changeSummary');
     const changeDetails = document.getElementById('changeDetails');
 
-    if (changes.summary.breaking_changes_count > 0 ||
-        changes.summary.new_endpoints_count > 0 ||
-        changes.summary.modified_endpoints_count > 0) {
+    // changesData 구조: { generatedAt, summary: { breakingChanges, newEndpoints, modifiedEndpoints, riskLevel }, changes: { breaking, newEndpoints, modifiedEndpoints } }
+    const summary = changesData.summary || {};
+    const changes = changesData.changes || {};
+
+    if (summary.breakingChanges > 0 || summary.newEndpoints > 0 || summary.modifiedEndpoints > 0) {
 
       changeSummary.classList.add('has-changes');
 
-      if (changes.summary.breaking_changes_count > 0) {
+      if (summary.breakingChanges > 0) {
         changeSummary.classList.add('breaking');
-      } else if (changes.summary.new_endpoints_count > 0) {
+      } else if (summary.newEndpoints > 0) {
         changeSummary.classList.add('new-endpoints');
       }
 
       let html = '<div class="change-list">';
 
-      if (changes.breaking_changes && changes.breaking_changes.length > 0) {
+      // Breaking Changes
+      if (changes.breaking && changes.breaking.length > 0) {
         html += '<div class="change-item">';
-        html += '<div class="change-type breaking">Breaking Changes</div>';
-        changes.breaking_changes.forEach(change => {
-          html += `<div>• ${change.description}</div>`;
+        html += '<div class="change-type breaking">🚨 Breaking Changes</div>';
+        changes.breaking.forEach(change => {
+          html += `<div>• ${change.description || change.summary || 'Breaking change detected'}</div>`;
         });
         html += '</div>';
       }
 
-      if (changes.new_endpoints && changes.new_endpoints.length > 0) {
+      // New Endpoints
+      if (changes.newEndpoints && changes.newEndpoints.length > 0) {
         html += '<div class="change-item">';
-        html += '<div class="change-type new">New Endpoints</div>';
-        changes.new_endpoints.slice(0, 5).forEach(endpoint => {
-          html += `<div>• ${endpoint.method} ${endpoint.path}</div>`;
+        html += '<div class="change-type new">✨ New Endpoints</div>';
+        changes.newEndpoints.slice(0, 5).forEach(endpoint => {
+          const summary = endpoint.summary ? ` - ${endpoint.summary}` : '';
+          html += `<div>• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path}${summary}</div>`;
         });
-        if (changes.new_endpoints.length > 5) {
-          html += `<div>• ... and ${changes.new_endpoints.length - 5} more</div>`;
+        if (changes.newEndpoints.length > 5) {
+          html += `<div>• ... and ${changes.newEndpoints.length - 5} more</div>`;
         }
         html += '</div>';
       }
 
-      if (changes.modified_endpoints && changes.modified_endpoints.length > 0) {
+      // Modified Endpoints
+      if (changes.modifiedEndpoints && changes.modifiedEndpoints.length > 0) {
         html += '<div class="change-item">';
-        html += '<div class="change-type modified">Modified Endpoints</div>';
-        changes.modified_endpoints.slice(0, 5).forEach(endpoint => {
-          html += `<div>• ${endpoint.method} ${endpoint.path} (${endpoint.changes.length} changes)</div>`;
+        html += '<div class="change-type modified">🔄 Modified Endpoints</div>';
+        changes.modifiedEndpoints.slice(0, 5).forEach(endpoint => {
+          const changesCount = endpoint.changes ? endpoint.changes.length : 1;
+          html += `<div>• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path} (${changesCount} changes)</div>`;
         });
-        if (changes.modified_endpoints.length > 5) {
-          html += `<div>• ... and ${changes.modified_endpoints.length - 5} more</div>`;
+        if (changes.modifiedEndpoints.length > 5) {
+          html += `<div>• ... and ${changes.modifiedEndpoints.length - 5} more</div>`;
         }
         html += '</div>';
       }
+
+      // 서비스 인덱스 연계 링크 추가
+      html += '<div class="change-item" style="border-top: 1px solid var(--border-color); margin-top: 16px; padding-top: 16px;">';
+      html += '<div style="text-align: center;">';
+      html += '<a href="../../" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">';
+      html += '📊 더 상세한 버전 비교 및 타임라인 보기 →';
+      html += '</a>';
+      html += '</div>';
+      html += '</div>';
 
       html += '</div>';
       changeDetails.innerHTML = html;
@@ -619,7 +648,7 @@
   }
 
   // Handle version selection
-  document.getElementById('versionSelector').addEventListener('change', function(e) {
+  document.getElementById('versionSelector').addEventListener('change', function (e) {
     const selectedVersion = e.target.value;
     if (selectedVersion && selectedVersion !== '{{VERSION}}') {
       const currentPath = window.location.pathname;
@@ -630,17 +659,17 @@
 
   // Smooth scroll for navigation
   document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', function(e) {
+    link.addEventListener('click', function (e) {
       e.preventDefault();
       const target = document.querySelector(this.getAttribute('href'));
       if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        target.scrollIntoView({behavior: 'smooth', block: 'start'});
       }
     });
   });
 
   // Initialize
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     loadChanges();
     loadVersions();
   });

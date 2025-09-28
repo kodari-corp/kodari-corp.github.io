@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GloView API Documentation</title>
+  <title>{{SITE_TITLE}}</title>
   <style>
     * {
       margin: 0;
@@ -193,66 +193,36 @@
 <body>
 <div class="container">
   <div class="header">
-    <h1>🌏 GloView API Documentation</h1>
-    <p>Comprehensive API documentation for all GloView services</p>
+    <h1>{{HEADER_TITLE}}</h1>
+    <p>{{HEADER_DESCRIPTION}}</p>
   </div>
 
   <!-- Services Statistics -->
   <div class="stats-summary">
     <h3>📊 Documentation Overview</h3>
     <div class="stats-grid">
-      
-            <div class="stat-item">
-                <span class="stat-number">1</span>
-                <div class="stat-label">Active Services</div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">2</span>
-                <div class="stat-label">Total Versions</div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">1+</span>
-                <div class="stat-label">API Endpoints</div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">2025. 9. 27.</span>
-                <div class="stat-label">Last Updated</div>
-            </div>
-        
+      {{STATS_CONTENT}}
     </div>
   </div>
 
   <!-- Services Grid -->
   <div class="services-grid">
-    
-    <div class="service-card">
-      <h2>📸 GloView API (Main Service)</h2>
-      <p>Core photo sharing API with geospatial features, user authentication, and photo management.</p>
-      <small style="color: #27ae60; font-weight: 500;">📊 1 new, 0 modified</small>
-      <div class="version-links">
-        <a href="services/gloview-api/latest/" class="version-link latest">Latest (v0.4.1)</a>
-        <a href="services/gloview-api/versions/v0.4.1/" class="version-link">v0.4.1</a>
-        <a href="services/gloview-api/versions/v0.4.0/" class="version-link">v0.4.0</a>
-      </div>
-    </div>
+    {{SERVICES_CONTENT}}
   </div>
 
   <div class="quick-links">
     <h3>🔗 Quick Links</h3>
-    <a href="services/gloview-api/">📊 GloView API Timeline</a>
-    <a href="services/gloview-api/latest/">📖 Latest API Docs</a>
-    <a href="https://github.com/wishandcheers/gloview">🔗 Source Code</a>
-    <a href="changelog.html">📋 Changelog</a>
+    {{QUICK_LINKS_CONTENT}}
   </div>
 
   <div class="footer">
-    <p>Last updated: 2025. 9. 28. 오후 1:45:35 | Generated automatically from OpenAPI specs</p>
+    <p>Last updated: {{LAST_UPDATED}} | Generated automatically from OpenAPI specs</p>
   </div>
 </div>
 
 <script>
   // Add any dynamic functionality here if needed
-  console.log('GloView API Documentation - Documentation loaded at 2025. 9. 28. 오후 1:45:35');
+  console.log('{{SITE_TITLE}} - Documentation loaded at {{LAST_UPDATED}}');
 </script>
 </body>
 </html>

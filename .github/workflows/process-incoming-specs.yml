@@ -103,6 +103,18 @@ jobs:
 
         echo "✅ Service index pages generation completed"
 
+    - name: Update main index page
+      run: |
+        echo "🏠 Updating main index page with latest versions"
+        node scripts/generate-main-index.js ./services ./templates ./index.html
+        echo "✅ Main index page updated with current service versions"
+
+    - name: Generate changelog
+      run: |
+        echo "📋 Generating changelog from all version changes"
+        node scripts/generate-changelog.js ./services ./changelog.html
+        echo "✅ Changelog generated with complete version history"
+
     - name: Commit processed documentation
       run: |
         git config user.name "GitHub Actions Bot (apidocs)"

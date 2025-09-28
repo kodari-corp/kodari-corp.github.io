@@ -197,7 +197,14 @@ class ServiceIndexGenerator {
         try {
             // OpenAPI JSON 파일 찾기
             const files = fs.readdirSync(versionPath);
-            const openApiFile = files.find(file => file.includes('openapi') && file.endsWith('.json'));
+            // OpenAPI JSON 파일 찾기 (다양한 이름 패턴 지원)
+            const openApiFile = files.find(file =>
+                (file.includes('openapi') ||
+                 file.includes('apiDocs') ||
+                 file.includes('swagger') ||
+                 file === 'api.json') &&
+                file.endsWith('.json')
+            );
 
             if (!openApiFile) {
                 return 0;

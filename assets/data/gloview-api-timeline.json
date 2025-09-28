@@ -1,74 +1,32 @@
 {
   "service": "gloview-api",
-  "lastUpdated": "2025-09-27T14:23:00.611Z",
+  "lastUpdated": "2025-09-28T01:48:29.432Z",
   "versions": [
-    {
-      "version": "v0.1.0",
-      "type": "release",
-      "timestamp": "2024-08-01T10:00:00Z",
-      "changes": {
-        "breaking_changes": 0,
-        "new_endpoints": 15,
-        "modified_endpoints": 0,
-        "risk_level": "low"
-      },
-      "total_endpoints": 15,
-      "deployment_url": "versions/v0.1.0/",
-      "documentation_url": "versions/v0.1.0/index.html"
-    },
-    {
-      "version": "v0.2.0",
-      "type": "release",
-      "timestamp": "2024-08-15T14:30:00Z",
-      "changes": {
-        "breaking_changes": 1,
-        "new_endpoints": 8,
-        "modified_endpoints": 3,
-        "risk_level": "medium"
-      },
-      "total_endpoints": 23,
-      "deployment_url": "versions/v0.2.0/",
-      "documentation_url": "versions/v0.2.0/index.html"
-    },
-    {
-      "version": "v0.3.0",
-      "type": "release",
-      "timestamp": "2024-09-01T09:15:00Z",
-      "changes": {
-        "breaking_changes": 0,
-        "new_endpoints": 5,
-        "modified_endpoints": 2,
-        "risk_level": "high"
-      },
-      "total_endpoints": 28,
-      "deployment_url": "versions/v0.3.0/",
-      "documentation_url": "versions/v0.3.0/index.html"
-    },
     {
       "version": "v0.4.0",
       "type": "release",
-      "timestamp": "2024-09-20T16:45:00Z",
+      "timestamp": "2025-09-27T08:25:34Z",
       "changes": {
-        "breaking_changes": 2,
-        "new_endpoints": 7,
-        "modified_endpoints": 5,
-        "risk_level": "high"
+        "breaking_changes": 0,
+        "new_endpoints": "unknown",
+        "modified_endpoints": 0,
+        "risk_level": "low"
       },
-      "total_endpoints": 35,
+      "total_endpoints": 30,
       "deployment_url": "versions/v0.4.0/",
       "documentation_url": "versions/v0.4.0/index.html"
     },
     {
       "version": "v0.4.1",
       "type": "release",
-      "timestamp": "2024-09-27T13:54:44.760Z",
+      "timestamp": "2025-09-27T13:54:44.760Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 1,
         "modified_endpoints": 0,
         "risk_level": "low"
       },
-      "total_endpoints": 36,
+      "total_endpoints": 31,
       "deployment_url": "versions/v0.4.1/",
       "documentation_url": "versions/v0.4.1/index.html"
     }

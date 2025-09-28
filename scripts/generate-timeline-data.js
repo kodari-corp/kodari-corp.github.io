@@ -53,7 +53,23 @@ class TimelineDataGenerator {
     processVersion(versionsDir, version) {
         const versionDir = path.join(versionsDir, version);
         const changesReportPath = path.join(versionDir, 'changes-report.json');
-        const openApiPath = path.join(versionDir, 'openapi.json');
+        // OpenAPI JSON 파일 찾기 (다양한 이름 패턴 지원)
+        const possibleOpenApiFiles = [
+            'openapi.json',
+            'apiDocs-api.json',
+            'apiDocs-all.json',
+            'swagger.json',
+            'api.json'
+        ];
+
+        let openApiPath = null;
+        for (const fileName of possibleOpenApiFiles) {
+            const filePath = path.join(versionDir, fileName);
+            if (fs.existsSync(filePath)) {
+                openApiPath = filePath;
+                break;
+            }
+        }
 
         console.log(`📋 Processing version: ${version}`);
 
@@ -61,7 +77,7 @@ class TimelineDataGenerator {
         let totalEndpoints = 0;
         let specTimestamp = null;
 
-        if (fs.existsSync(openApiPath)) {
+        if (openApiPath && fs.existsSync(openApiPath)) {
             try {
                 const openApiSpec = JSON.parse(fs.readFileSync(openApiPath, 'utf8'));
                 totalEndpoints = this.countEndpoints(openApiSpec);

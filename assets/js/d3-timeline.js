@@ -159,6 +159,23 @@ class D3Timeline {
         // Scales configured
     }
 
+    /**
+     * 외부 데이터를 사용하여 타임라인 렌더링
+     * @param {Array} versions - 버전 데이터 배열
+     */
+    renderWithData(versions) {
+        if (!versions || versions.length === 0) {
+            this.showError('No timeline data available');
+            return;
+        }
+
+        this.data = versions;
+        this.filteredData = [...this.data]; // 초기에는 모든 데이터 표시
+
+        this.setupScales();
+        this.render();
+    }
+
     render() {
         if (this.filteredData.length === 0) {
             this.showError('No timeline data available');

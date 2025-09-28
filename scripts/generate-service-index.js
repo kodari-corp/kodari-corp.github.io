@@ -102,7 +102,12 @@ class ServiceIndexGenerator {
             daysSinceUpdate: this.calculateDaysSinceUpdate(latestVersion),
             lastUpdated: this.formatLastUpdated(),
             versions: versions,
-            timelineData: timelineData
+            timelineData: timelineData,
+            // 새로운 템플릿 변수들
+            allChangesBadge: this.generateAllChangesBadge(latestVersion),
+            apiChangesBadge: this.generateApiChangesBadge(latestVersion),
+            internalChangesBadge: this.generateInternalChangesBadge(latestVersion),
+            recentVersions: this.getRecentVersions(versions, 4)
         };
     }
 
@@ -324,10 +329,79 @@ class ServiceIndexGenerator {
     }
 
     /**
+     * 전체 API 변경사항 배지 생성
+     */
+    generateAllChangesBadge(latestVersion) {
+        if (!latestVersion || !latestVersion.changes) {
+            return 'STABLE';
+        }
+
+        const changes = latestVersion.changes;
+        if (changes.breaking_changes > 0) {
+            return 'BREAKING';
+        } else if (changes.new_endpoints > 0) {
+            return 'NEW';
+        } else if (changes.modified_endpoints > 0) {
+            return 'UPDATED';
+        }
+        return 'STABLE';
+    }
+
+    /**
+     * 공개 API 변경사항 배지 생성
+     */
+    generateApiChangesBadge(latestVersion) {
+        if (!latestVersion || !latestVersion.changes) {
+            return 'STABLE';
+        }
+
+        // 공개 API의 경우 보통 안정성을 강조
+        const changes = latestVersion.changes;
+        if (changes.breaking_changes > 0) {
+            return 'BREAKING';
+        } else if (changes.new_endpoints > 0 || changes.modified_endpoints > 0) {
+            return 'UPDATED';
+        }
+        return 'STABLE';
+    }
+
+    /**
+     * 내부 API 변경사항 배지 생성
+     */
+    generateInternalChangesBadge(latestVersion) {
+        if (!latestVersion || !latestVersion.changes) {
+            return 'STABLE';
+        }
+
+        // 내부 API는 더 자주 변경될 수 있음
+        const changes = latestVersion.changes;
+        if (changes.breaking_changes > 0) {
+            return 'BREAKING';
+        } else if (changes.new_endpoints > 0) {
+            return 'NEW';
+        } else if (changes.modified_endpoints > 0) {
+            return 'MODIFIED';
+        }
+        return 'STABLE';
+    }
+
+    /**
+     * 최근 버전 목록 생성
+     */
+    getRecentVersions(versions, count = 4) {
+        return versions
+            .filter(v => v.type === 'release')
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(0, count)
+            .map(v => v.version);
+    }
+
+    /**
      * 템플릿 변수 치환
      */
     replaceTemplateVariables(template, data) {
-        return template
+        // 기본 변수 치환
+        let result = template
             .replace(/\{\{SERVICE_NAME\}\}/g, data.serviceName)
             .replace(/\{\{SERVICE_DESCRIPTION\}\}/g, data.serviceDescription)
             .replace(/\{\{TOTAL_VERSIONS\}\}/g, data.totalVersions)
@@ -335,6 +409,31 @@ class ServiceIndexGenerator {
             .replace(/\{\{TOTAL_ENDPOINTS\}\}/g, data.totalEndpoints)
             .replace(/\{\{DAYS_SINCE_UPDATE\}\}/g, data.daysSinceUpdate)
             .replace(/\{\{LAST_UPDATED\}\}/g, data.lastUpdated);
+
+        // 변경사항 배지 치환
+        result = result
+            .replace(/\{\{ALL_CHANGES_BADGE\}\}/g, data.allChangesBadge || 'STABLE')
+            .replace(/\{\{API_CHANGES_BADGE\}\}/g, data.apiChangesBadge || 'STABLE')
+            .replace(/\{\{INTERNAL_CHANGES_BADGE\}\}/g, data.internalChangesBadge || 'STABLE');
+
+        // 최근 버전 목록 치환
+        result = this.replaceRecentVersions(result, data.recentVersions || []);
+
+        return result;
+    }
+
+    /**
+     * 최근 버전 템플릿 블록 치환
+     */
+    replaceRecentVersions(template, recentVersions) {
+        // {{#RECENT_VERSIONS}} ... {{/RECENT_VERSIONS}} 블록 찾기
+        const versionBlockRegex = /\{\{#RECENT_VERSIONS\}\}([\s\S]*?)\{\{\/RECENT_VERSIONS\}\}/g;
+
+        return template.replace(versionBlockRegex, (match, blockContent) => {
+            return recentVersions.map(version => {
+                return blockContent.replace(/\{\{VERSION\}\}/g, version);
+            }).join('');
+        });
     }
 
     /**

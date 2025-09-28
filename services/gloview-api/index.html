@@ -159,6 +159,186 @@
             color: white;
         }
 
+        /* API Groups */
+        .api-groups {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .group-card {
+            background: var(--card-background);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .group-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            opacity: 0.8;
+        }
+
+        .group-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+            border-color: var(--primary-color);
+        }
+
+        .group-card.group-all::before {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .group-card.group-api::before {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+        }
+
+        .group-card.group-internal::before {
+            background: linear-gradient(90deg, #fa709a, #fee140);
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .group-title {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .group-description {
+            color: var(--text-secondary);
+            margin: 0 0 25px 0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .group-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .primary-btn {
+            display: block;
+            text-align: center;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .primary-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .primary-btn:hover::before {
+            left: 100%;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .version-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .version-btn {
+            background: var(--background-secondary);
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .version-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        /* Change Badges */
+        .change-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .badge-new {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #81c784;
+        }
+
+        .badge-modified {
+            background: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffb74d;
+        }
+
+        .badge-stable {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            border: 1px solid #ba68c8;
+        }
+
+        .badge-critical {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+
+        /* Quick Navigation */
+        .quick-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
         /* Version List */
         .version-list {
             background: var(--card-background);
@@ -309,23 +489,79 @@
         <!-- Quick Navigation -->
         <div class="navigation-section">
             <h2 class="section-title">
-                🚀 Quick Access
+                📋 API Documentation Groups
             </h2>
-            <div class="nav-cards">
-                <div class="nav-card">
-                    <h3 class="nav-card-title">Latest API Documentation</h3>
-                    <p class="nav-card-description">
-                        Access the most recent version of the API documentation with all the latest features and endpoints.
+            <div class="api-groups">
+                <!-- Complete API Group -->
+                <div class="group-card group-all">
+                    <div class="group-header">
+                        <h3 class="group-title">🔄 Complete API</h3>
+                        <span class="change-badge badge-new">NEW</span>
+                    </div>
+                    <p class="group-description">
+                        모든 엔드포인트를 포함한 전체 API 문서 (개발자/관리자용)
                     </p>
-                    <a href="./latest/" class="nav-card-link">
-                        View Latest Docs →
-                    </a>
+                    <div class="group-links">
+                        <a href="./latest/index.html" class="primary-btn">Latest (v0.4.1)</a>
+                        <div class="version-links">
+                            
+                            <a href="./versions/v0.4.1/index.html" class="version-btn">v0.4.1</a>
+                            
+                            <a href="./versions/v0.4.0/index.html" class="version-btn">v0.4.0</a>
+                            
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Public API Group -->
+                <div class="group-card group-api">
+                    <div class="group-header">
+                        <h3 class="group-title">🌐 Public API</h3>
+                        <span class="change-badge badge-stable">UPDATED</span>
+                    </div>
+                    <p class="group-description">
+                        클라이언트 개발자용 공개 엔드포인트만 포함
+                    </p>
+                    <div class="group-links">
+                        <a href="./latest/apiDocs-api.html" class="primary-btn">Latest (v0.4.1)</a>
+                        <div class="version-links">
+                            
+                            <a href="./versions/v0.4.1/apiDocs-api.html" class="version-btn">v0.4.1</a>
+                            
+                            <a href="./versions/v0.4.0/apiDocs-api.html" class="version-btn">v0.4.0</a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal API Group -->
+                <div class="group-card group-internal">
+                    <div class="group-header">
+                        <h3 class="group-title">🔒 Internal API</h3>
+                        <span class="change-badge badge-modified">NEW</span>
+                    </div>
+                    <p class="group-description">
+                        내부 시스템용 엔드포인트 (관리자/백엔드 개발자용)
+                    </p>
+                    <div class="group-links">
+                        <a href="./latest/apiDocs-internal.html" class="primary-btn">Latest (v0.4.1)</a>
+                        <div class="version-links">
+                            
+                            <a href="./versions/v0.4.1/apiDocs-internal.html" class="version-btn">v0.4.1</a>
+                            
+                            <a href="./versions/v0.4.0/apiDocs-internal.html" class="version-btn">v0.4.0</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Navigation -->
+            <div class="quick-nav">
                 <div class="nav-card">
-                    <h3 class="nav-card-title">Version Timeline</h3>
+                    <h3 class="nav-card-title">📈 Version Timeline</h3>
                     <p class="nav-card-description">
-                        Interactive timeline showing version history, changes, and evolution of the API over time.
+                        API 버전 히스토리와 변경사항 타임라인 확인
                     </p>
                     <a href="#timeline" class="nav-card-link">
                         Explore Timeline →
@@ -333,9 +569,9 @@
                 </div>
 
                 <div class="nav-card">
-                    <h3 class="nav-card-title">All Versions</h3>
+                    <h3 class="nav-card-title">📚 All Versions</h3>
                     <p class="nav-card-description">
-                        Browse and compare all available versions of the API documentation.
+                        모든 버전의 API 문서 탐색 및 비교
                     </p>
                     <a href="#versions" class="nav-card-link">
                         Browse Versions →
@@ -378,7 +614,7 @@
                 <a href="https://github.com/kodari-corp/kodari-corp.github.io" class="footer-link">GitHub Repository</a>
             </div>
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                Last updated: <span id="pageLastUpdated">2025년 9월 28일 오후 01:14</span>
+                Last updated: <span id="pageLastUpdated">2025년 9월 28일 오후 09:59</span>
             </p>
         </div>
     </div>

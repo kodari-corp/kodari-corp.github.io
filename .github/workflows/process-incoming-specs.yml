@@ -87,10 +87,21 @@ jobs:
 
     - name: Update version timeline
       run: |
-        echo "📊 Updating version timeline"
-        # 전체 서비스의 버전 타임라인 업데이트 (추후 구현)
-        # node scripts/update-version-timeline.js
-        echo "Version timeline update will be implemented in Phase 2"
+        echo "📊 Updating version timeline data for all services"
+
+        # 타임라인 데이터 생성을 위한 추가 dependencies 설치
+        npm install jq
+
+        # 모든 서비스의 타임라인 데이터 업데이트
+        node scripts/update-all-timelines.js ./services ./assets/data
+
+        echo "✅ Timeline data generation completed"
+
+        # 서비스 인덱스 페이지 생성 (타임라인 통합)
+        echo "🏗️  Generating service index pages with timeline integration"
+        node scripts/generate-service-index.js ./services ./templates ./assets
+
+        echo "✅ Service index pages generation completed"
 
     - name: Commit processed documentation
       run: |

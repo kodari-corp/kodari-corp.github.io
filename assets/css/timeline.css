@@ -1,0 +1,319 @@
+/**
+ * D3.js Timeline Styles
+ * API 버전 타임라인 시각화를 위한 CSS 스타일
+ */
+
+/* Timeline 컨테이너 */
+.timeline-container {
+    width: 100%;
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.timeline-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-subtitle {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+/* SVG Timeline */
+.timeline-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Timeline 라인 */
+.timeline-line {
+    stroke-linecap: round;
+}
+
+/* Timeline 포인트 */
+.timeline-point {
+    transition: filter 0.2s ease, stroke-width 0.2s ease;
+}
+
+.timeline-point:hover {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) brightness(1.1) !important;
+    stroke-width: 3px;
+}
+
+.timeline-point:active {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) brightness(0.9) !important;
+}
+
+/* Timeline 라벨 */
+.timeline-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Timeline 축 */
+.timeline-axis {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+.timeline-axis .tick text {
+    font-size: 12px;
+    fill: #666;
+}
+
+.timeline-axis .tick line {
+    stroke: #ddd;
+    stroke-width: 1px;
+}
+
+.timeline-axis .domain {
+    stroke: #ddd;
+    stroke-width: 1px;
+}
+
+/* 툴팁 (D3에서 동적 생성) */
+.timeline-tooltip {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.4;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+/* 범례 */
+.timeline-legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.legend-color.low { background-color: #28a745; }
+.legend-color.medium { background-color: #ffc107; }
+.legend-color.high { background-color: #dc3545; }
+.legend-color.critical { background-color: #6f42c1; }
+
+/* 로딩 상태 */
+.timeline-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.timeline-loading::before {
+    content: '⏳';
+    margin-right: 0.5rem;
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+
+/* 에러 상태 */
+.timeline-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #dc3545;
+    font-size: 1.1rem;
+    border: 2px dashed #f5c6cb;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    margin: 1rem 0;
+}
+
+.timeline-error::before {
+    content: '⚠️';
+    margin-right: 0.5rem;
+}
+
+/* 반응형 디자인 및 모바일 최적화 */
+@media (max-width: 768px) {
+    .timeline-container {
+        padding: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .timeline-title {
+        font-size: 1.25rem;
+    }
+
+    .timeline-subtitle {
+        font-size: 0.85rem;
+    }
+
+    /* 모바일에서 타임라인 포인트 크기 증가 (터치 친화적) */
+    .timeline-point {
+        r: 12px !important; /* 기본 포인트 크기 증가 */
+        stroke-width: 3px;
+    }
+
+    .timeline-point:hover,
+    .timeline-point:focus {
+        stroke-width: 4px;
+        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4)) brightness(1.2) !important;
+    }
+
+    /* 모바일에서 라벨 크기 조정 */
+    .timeline-label {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+    }
+
+    /* 범례 모바일 최적화 */
+    .timeline-legend {
+        gap: 1rem;
+        margin-top: 1rem;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        font-size: 0.8rem;
+        flex: 1;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* SVG 모바일 최적화 */
+    .timeline-svg {
+        width: 100%;
+        height: auto;
+        min-height: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .timeline-container {
+        padding: 0.5rem;
+        border-radius: 6px;
+    }
+
+    .timeline-legend {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .timeline-svg {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    .timeline-container {
+        background: #1e1e1e;
+        border-color: #404040;
+        color: #e0e0e0;
+    }
+
+    .timeline-title {
+        color: #f0f0f0;
+    }
+
+    .timeline-subtitle {
+        color: #b0b0b0;
+    }
+
+    .timeline-label {
+        fill: #e0e0e0 !important;
+    }
+
+    .timeline-axis .tick text {
+        fill: #b0b0b0 !important;
+    }
+
+    .timeline-axis .tick line,
+    .timeline-axis .domain {
+        stroke: #505050 !important;
+    }
+
+    .legend-item {
+        color: #d0d0d0;
+    }
+
+    .timeline-error {
+        background-color: #2d1d1d;
+        border-color: #704444;
+        color: #ff6b6b;
+    }
+}
+
+/* 프린트 스타일 */
+@media print {
+    .timeline-container {
+        border: 1px solid #000;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+
+    .timeline-svg {
+        max-width: 100%;
+    }
+
+    .timeline-tooltip {
+        display: none !important;
+    }
+}
+
+/* 접근성 개선 */
+.timeline-point {
+    outline: none;
+}
+
+.timeline-point:focus {
+    stroke: #007bff;
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 0 2px rgba(0, 123, 255, 0.25));
+}
+
+/* 고해상도 디스플레이 지원 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .timeline-svg {
+        shape-rendering: geometricPrecision;
+    }
+}

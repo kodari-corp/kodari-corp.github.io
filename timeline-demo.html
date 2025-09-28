@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>API Timeline Demo - gloview-api</title>
+
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Timeline 스타일 -->
+    <link rel="stylesheet" href="assets/css/timeline.css">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: #6c757d;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .demo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .demo-button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .demo-button:active {
+            transform: translateY(0);
+        }
+
+        .demo-button.secondary {
+            background: #6c757d;
+        }
+
+        .demo-button.secondary:hover {
+            background: #545b62;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        #timeline-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* 필터링 UI 스타일 */
+        .timeline-filters {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filters-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        .filter-group label:has(input[type="checkbox"]) {
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .filter-stats {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        @media (max-width: 768px) {
+            .filters-row {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                min-width: auto;
+                width: 100%;
+            }
+
+            /* 모바일 터치 친화적 개선 */
+            body {
+                padding: 1rem;
+                font-size: 16px; /* iOS 줌 방지 */
+            }
+
+            .demo-controls {
+                gap: 0.75rem;
+            }
+
+            .demo-button {
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+                min-height: 44px; /* iOS 터치 권장 크기 */
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .timeline-filters {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+
+            .filter-group input,
+            .filter-group select {
+                padding: 0.75rem;
+                font-size: 16px; /* iOS 줌 방지 */
+                min-height: 44px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .demo-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .demo-button {
+                width: 100%;
+                margin: 0;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* 버전 비교 UI 스타일 */
+        .comparison-panel {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: #f0f8ff;
+            border-radius: 8px;
+            border: 2px solid #007bff;
+        }
+
+        .comparison-header h3 {
+            margin: 0 0 0.5rem 0;
+            color: #007bff;
+            font-size: 1.25rem;
+        }
+
+        .comparison-header p {
+            margin: 0 0 1rem 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .selected-versions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .version-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #007bff;
+        }
+
+        .version-badge .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comparison-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .comparison-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .comparison-result h4 {
+            margin: 0 0 1rem 0;
+            color: #495057;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .positive-change {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .negative-change {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .neutral-change {
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-controls {
+                flex-direction: column;
+            }
+
+            .comparison-controls .demo-button {
+                width: 100%;
+            }
+
+            .selected-versions {
+                justify-content: center;
+            }
+
+            .comparison-table {
+                font-size: 0.85rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1 class="page-title">🚀 API Timeline Visualization</h1>
+        <p class="page-subtitle">
+            gloview-api의 버전 히스토리를 인터랙티브한 타임라인으로 시각화합니다.
+            각 버전 포인트를 클릭하여 해당 버전의 API 문서를 확인할 수 있습니다.
+        </p>
+    </div>
+
+    <div class="demo-controls">
+        <button class="demo-button" onclick="loadDemoData()">
+            🎭 데모 데이터 로드
+        </button>
+        <button class="demo-button secondary" onclick="loadRealData()">
+            📊 실제 데이터 로드
+        </button>
+        <button class="demo-button secondary" onclick="clearTimeline()">
+            🗑️ 타임라인 초기화
+        </button>
+        <button class="demo-button secondary" onclick="toggleFilters()">
+            🔍 검색/필터 토글
+        </button>
+        <button class="demo-button secondary" onclick="toggleComparisonMode()" id="comparison-toggle">
+            🔀 버전 비교 모드
+        </button>
+    </div>
+
+    <div id="status-message" class="status-message info" style="display: none;">
+        타임라인을 로드하려면 위의 버튼을 클릭하세요.
+    </div>
+
+    <div class="timeline-container">
+        <div class="timeline-header">
+            <h2 class="timeline-title">API Version Timeline</h2>
+            <p class="timeline-subtitle">각 점은 API 버전을 나타내며, 색상은 변경사항의 위험도를 표시합니다</p>
+        </div>
+
+        <!-- 검색 및 필터링 UI -->
+        <div class="timeline-filters" id="timeline-filters" style="display: none;">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="version-search">버전 검색:</label>
+                    <input type="text" id="version-search" placeholder="예: v0.4, 0.4.1">
+                </div>
+
+                <div class="filter-group">
+                    <label for="risk-filter">위험도:</label>
+                    <select id="risk-filter">
+                        <option value="all">전체</option>
+                        <option value="low">Low Risk</option>
+                        <option value="medium">Medium Risk</option>
+                        <option value="high">High Risk</option>
+                        <option value="critical">Critical Risk</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="breaking-changes-filter">
+                        <input type="checkbox" id="breaking-changes-filter">
+                        Breaking Changes만 표시
+                    </label>
+                </div>
+            </div>
+
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="date-start">시작 날짜:</label>
+                    <input type="date" id="date-start">
+                </div>
+
+                <div class="filter-group">
+                    <label for="date-end">종료 날짜:</label>
+                    <input type="date" id="date-end">
+                </div>
+
+                <div class="filter-group">
+                    <button class="demo-button secondary" onclick="clearAllFilters()">
+                        🗑️ 필터 초기화
+                    </button>
+                </div>
+
+                <div class="filter-group">
+                    <span id="filter-stats" class="filter-stats"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 버전 비교 UI -->
+        <div class="comparison-panel" id="comparison-panel" style="display: none;">
+            <div class="comparison-header">
+                <h3>🔀 버전 비교</h3>
+                <p id="comparison-instruction">비교할 두 버전을 클릭하세요 (최대 2개)</p>
+            </div>
+
+            <div class="selected-versions" id="selected-versions">
+                <!-- 선택된 버전들이 여기에 표시됩니다 -->
+            </div>
+
+            <div class="comparison-controls">
+                <button class="demo-button" onclick="performComparison()" id="compare-button" disabled>
+                    📊 비교 결과 보기
+                </button>
+                <button class="demo-button secondary" onclick="clearVersionSelection()">
+                    🗑️ 선택 초기화
+                </button>
+            </div>
+
+            <div class="comparison-result" id="comparison-result" style="display: none;">
+                <!-- 비교 결과가 여기에 표시됩니다 -->
+            </div>
+        </div>
+
+        <div id="timeline-visualization"></div>
+
+        <div class="timeline-legend">
+            <div class="legend-item">
+                <div class="legend-color low"></div>
+                <span>Low Risk (안전한 변경)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color medium"></div>
+                <span>Medium Risk (보통 주의)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color high"></div>
+                <span>High Risk (위험한 변경)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color critical"></div>
+                <span>Critical Risk (치명적 변경)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>D3.js Timeline Visualization Demo | gloview-api Documentation</p>
+    </div>
+
+    <!-- Timeline JavaScript -->
+    <script src="assets/js/d3-timeline.js"></script>
+
+    <script>
+        let timeline = null;
+
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status-message');
+            statusElement.textContent = message;
+            statusElement.className = `status-message ${type}`;
+            statusElement.style.display = 'block';
+
+            // 3초 후 자동 숨김 (에러 제외)
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function initTimeline() {
+            if (timeline) {
+                timeline.destroy();
+            }
+
+            timeline = new D3Timeline('timeline-visualization', {
+                width: 1000,
+                height: 300,
+                pointRadius: 10
+            });
+
+            console.log('✅ Timeline initialized');
+        }
+
+        async function loadDemoData() {
+            try {
+                showStatus('🎭 데모 데이터를 로드하는 중...', 'info');
+
+                initTimeline();
+                await timeline.loadData('assets/data/gloview-api-timeline.json');
+                setupFilterEventListeners();
+                setupComparisonEventListeners();
+
+                showStatus('✅ 데모 데이터가 성공적으로 로드되었습니다!', 'success');
+            } catch (error) {
+                console.error('Demo data load error:', error);
+                showStatus(`❌ 데모 데이터 로드 실패: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadRealData() {
+            try {
+                showStatus('📊 실제 데이터를 로드하는 중...', 'info');
+
+                initTimeline();
+                await timeline.loadData('assets/data/gloview-api-timeline-real.json');
+                setupFilterEventListeners();
+                setupComparisonEventListeners();
+
+                showStatus('✅ 실제 데이터가 성공적으로 로드되었습니다!', 'success');
+            } catch (error) {
+                console.error('Real data load error:', error);
+                showStatus(`❌ 실제 데이터 로드 실패: ${error.message}`, 'error');
+            }
+        }
+
+        function clearTimeline() {
+            if (timeline) {
+                timeline.destroy();
+                timeline = null;
+                showStatus('🗑️ 타임라인이 초기화되었습니다', 'info');
+            }
+        }
+
+        // 반응형 처리
+        function handleResize() {
+            if (timeline) {
+                const container = document.getElementById('timeline-container');
+                const newWidth = Math.min(1000, container.offsetWidth - 40);
+                timeline.resize(newWidth);
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // 필터링 관련 함수들
+        function toggleFilters() {
+            const filtersDiv = document.getElementById('timeline-filters');
+            if (filtersDiv.style.display === 'none') {
+                filtersDiv.style.display = 'block';
+            } else {
+                filtersDiv.style.display = 'none';
+            }
+        }
+
+        function setupFilterEventListeners() {
+            // 버전 검색
+            document.getElementById('version-search').addEventListener('input', (e) => {
+                timeline.setFilter('version', e.target.value);
+                updateFilterStats();
+            });
+
+            // 위험도 필터
+            document.getElementById('risk-filter').addEventListener('change', (e) => {
+                timeline.setFilter('riskLevel', e.target.value);
+                updateFilterStats();
+            });
+
+            // Breaking Changes 체크박스
+            document.getElementById('breaking-changes-filter').addEventListener('change', (e) => {
+                timeline.setFilter('hasBreakingChanges', e.target.checked);
+                updateFilterStats();
+            });
+
+            // 날짜 필터
+            document.getElementById('date-start').addEventListener('change', (e) => {
+                timeline.setFilter('dateStart', e.target.value);
+                updateFilterStats();
+            });
+
+            document.getElementById('date-end').addEventListener('change', (e) => {
+                timeline.setFilter('dateEnd', e.target.value);
+                updateFilterStats();
+            });
+
+            // 초기 필터 통계 업데이트
+            updateFilterStats();
+        }
+
+        function clearAllFilters() {
+            if (timeline) {
+                timeline.clearFilters();
+
+                // UI 초기화
+                document.getElementById('version-search').value = '';
+                document.getElementById('risk-filter').value = 'all';
+                document.getElementById('breaking-changes-filter').checked = false;
+                document.getElementById('date-start').value = '';
+                document.getElementById('date-end').value = '';
+
+                updateFilterStats();
+            }
+        }
+
+        function updateFilterStats() {
+            if (timeline) {
+                const stats = timeline.getFilterStats();
+                const statsElement = document.getElementById('filter-stats');
+                statsElement.textContent = `표시된 버전: ${stats.filtered}/${stats.total}`;
+
+                if (stats.hidden > 0) {
+                    statsElement.style.color = '#ffc107';
+                } else {
+                    statsElement.style.color = '#6c757d';
+                }
+            }
+        }
+
+        // 버전 비교 관련 함수들
+        let comparisonMode = false;
+
+        function toggleComparisonMode() {
+            const button = document.getElementById('comparison-toggle');
+            const panel = document.getElementById('comparison-panel');
+
+            if (!timeline) {
+                showStatus('❌ 먼저 타임라인 데이터를 로드하세요', 'error');
+                return;
+            }
+
+            comparisonMode = !comparisonMode;
+
+            if (comparisonMode) {
+                timeline.enableComparisonMode();
+                button.textContent = '❌ 비교 모드 종료';
+                button.className = 'demo-button';
+                panel.style.display = 'block';
+                showStatus('🔀 비교 모드 활성화: 버전을 클릭하여 선택하세요', 'info');
+            } else {
+                timeline.disableComparisonMode();
+                button.textContent = '🔀 버전 비교 모드';
+                button.className = 'demo-button secondary';
+                panel.style.display = 'none';
+                clearVersionSelection();
+                showStatus('✅ 비교 모드가 비활성화되었습니다', 'success');
+            }
+        }
+
+        function setupComparisonEventListeners() {
+            if (timeline) {
+                timeline.onVersionSelectionChange = updateSelectedVersionsUI;
+            }
+        }
+
+        function updateSelectedVersionsUI(selectedVersions) {
+            const container = document.getElementById('selected-versions');
+            const compareButton = document.getElementById('compare-button');
+            const resultDiv = document.getElementById('comparison-result');
+
+            // 이전 결과 숨기기
+            resultDiv.style.display = 'none';
+
+            // 선택된 버전 표시
+            container.innerHTML = '';
+            selectedVersions.forEach(version => {
+                const badge = document.createElement('div');
+                badge.className = 'version-badge';
+                badge.innerHTML = `
+                    <span>${version}</span>
+                    <button class="remove-btn" onclick="removeVersionSelection('${version}')">×</button>
+                `;
+                container.appendChild(badge);
+            });
+
+            // 비교 버튼 활성화/비활성화
+            compareButton.disabled = selectedVersions.length !== 2;
+
+            // 안내 메시지 업데이트
+            const instruction = document.getElementById('comparison-instruction');
+            if (selectedVersions.length === 0) {
+                instruction.textContent = '비교할 두 버전을 클릭하세요 (최대 2개)';
+            } else if (selectedVersions.length === 1) {
+                instruction.textContent = '하나 더 선택하세요 (비교를 위해 2개 필요)';
+            } else {
+                instruction.textContent = '두 버전이 선택되었습니다. 비교 버튼을 클릭하세요!';
+            }
+        }
+
+        function removeVersionSelection(version) {
+            if (timeline) {
+                timeline.toggleVersionSelection(version);
+            }
+        }
+
+        function clearVersionSelection() {
+            if (timeline) {
+                timeline.selectedVersions = [];
+                timeline.render();
+                updateSelectedVersionsUI([]);
+            }
+        }
+
+        function performComparison() {
+            if (!timeline) return;
+
+            try {
+                const comparison = timeline.compareVersions();
+                displayComparisonResult(comparison);
+            } catch (error) {
+                showStatus(`❌ 비교 실패: ${error.message}`, 'error');
+            }
+        }
+
+        function displayComparisonResult(comparison) {
+            const resultDiv = document.getElementById('comparison-result');
+            const { olderVersion, newerVersion, comparison: comp } = comparison;
+
+            const formatDate = (timestamp) => {
+                return new Date(timestamp).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            const formatChange = (value, isPositive = null) => {
+                if (value === 0) return `<span class="neutral-change">${value}</span>`;
+                const className = isPositive === null ?
+                    (value > 0 ? 'positive-change' : 'negative-change') :
+                    (isPositive ? 'positive-change' : 'negative-change');
+                const prefix = value > 0 ? '+' : '';
+                return `<span class="${className}">${prefix}${value}</span>`;
+            };
+
+            const formatRiskChange = (change) => {
+                if (change === 'increased') return '<span class="negative-change">증가</span>';
+                if (change === 'decreased') return '<span class="positive-change">감소</span>';
+                return '<span class="neutral-change">동일</span>';
+            };
+
+            resultDiv.innerHTML = `
+                <h4>📊 버전 비교 결과</h4>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>항목</th>
+                            <th>${olderVersion.version}</th>
+                            <th>${newerVersion.version}</th>
+                            <th>변화량</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>릴리스 날짜</strong></td>
+                            <td>${formatDate(olderVersion.timestamp)}</td>
+                            <td>${formatDate(newerVersion.timestamp)}</td>
+                            <td>${comp.time_difference} 후</td>
+                        </tr>
+                        <tr>
+                            <td><strong>총 엔드포인트</strong></td>
+                            <td>${olderVersion.total_endpoints}</td>
+                            <td>${newerVersion.total_endpoints}</td>
+                            <td>${formatChange(comp.endpoint_difference)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>새 엔드포인트</strong></td>
+                            <td>${olderVersion.changes.new_endpoints}</td>
+                            <td>${newerVersion.changes.new_endpoints}</td>
+                            <td>${formatChange(comp.new_endpoints_diff)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>수정된 엔드포인트</strong></td>
+                            <td>${olderVersion.changes.modified_endpoints}</td>
+                            <td>${newerVersion.changes.modified_endpoints}</td>
+                            <td>${formatChange(comp.modified_endpoints_diff)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Breaking Changes</strong></td>
+                            <td>${olderVersion.changes.breaking_changes}</td>
+                            <td>${newerVersion.changes.breaking_changes}</td>
+                            <td>${formatChange(comp.breaking_changes_diff, false)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>위험도</strong></td>
+                            <td><span class="legend-color ${olderVersion.changes.risk_level}" style="display: inline-block; margin-right: 0.5rem;"></span>${olderVersion.changes.risk_level}</td>
+                            <td><span class="legend-color ${newerVersion.changes.risk_level}" style="display: inline-block; margin-right: 0.5rem;"></span>${newerVersion.changes.risk_level}</td>
+                            <td>${formatRiskChange(comp.risk_level_change)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            resultDiv.style.display = 'block';
+            showStatus('✅ 버전 비교가 완료되었습니다', 'success');
+        }
+
+        // 페이지 로드 시 기본 안내 메시지
+        document.addEventListener('DOMContentLoaded', () => {
+            showStatus('🚀 타임라인을 로드하려면 위의 버튼을 클릭하세요', 'info');
+        });
+    </script>
+</body>
+</html>

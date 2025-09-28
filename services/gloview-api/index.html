@@ -378,7 +378,7 @@
                 <a href="https://github.com/wishandcheers/apidocs" class="footer-link">GitHub Repository</a>
             </div>
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                Last updated: <span id="pageLastUpdated">2025년 9월 28일 오전 10:48</span>
+                Last updated: <span id="pageLastUpdated">2025년 9월 28일 오후 01:14</span>
             </p>
         </div>
     </div>
@@ -494,9 +494,15 @@
                             ${version.changes.risk_level.toUpperCase()}
                         </span>
                         <a href="./versions/${version.version}/"
-                           style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
-                            View Docs →
+                           style="color: var(--primary-color); text-decoration: none; font-weight: 500; margin-right: 15px;">
+                            📖 View Docs
                         </a>
+                        ${version.changes.new_endpoints > 0 || version.changes.modified_endpoints > 0 || version.changes.breaking_changes > 0 ? `
+                        <a href="./versions/${version.version}/#changeSummary"
+                           style="color: #2e7d32; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                            🔍 Changes Detail →
+                        </a>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');

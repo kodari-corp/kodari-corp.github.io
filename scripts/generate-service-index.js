@@ -104,9 +104,9 @@ class ServiceIndexGenerator {
             versions: versions,
             timelineData: timelineData,
             // 새로운 템플릿 변수들
-            allChangesBadge: this.generateAllChangesBadge(latestVersion),
-            apiChangesBadge: this.generateApiChangesBadge(latestVersion),
-            internalChangesBadge: this.generateInternalChangesBadge(latestVersion),
+            allChangesBadge: this.generateAllChangesBadge(latestVersion, serviceName),
+            apiChangesBadge: this.generateApiChangesBadge(latestVersion, serviceName),
+            internalChangesBadge: this.generateInternalChangesBadge(latestVersion, serviceName),
             recentVersions: this.getRecentVersions(versions, 4)
         };
     }
@@ -329,19 +329,55 @@ class ServiceIndexGenerator {
     }
 
     /**
+     * 그룹별 변경사항 리포트 로드
+     */
+    loadGroupedChanges(versionPath) {
+        try {
+            const groupedReportPath = path.join(versionPath, 'changes-report-grouped.json');
+            const legacyReportPath = path.join(versionPath, 'changes-report.json');
+
+            if (fs.existsSync(groupedReportPath)) {
+                const groupedReport = JSON.parse(fs.readFileSync(groupedReportPath, 'utf8'));
+                console.log(`📊 Loaded grouped changes report for ${path.basename(versionPath)}`);
+                return groupedReport.groups || {};
+            } else if (fs.existsSync(legacyReportPath)) {
+                // 기존 리포트를 'all' 그룹으로 처리
+                const legacyReport = JSON.parse(fs.readFileSync(legacyReportPath, 'utf8'));
+                console.log(`📋 Loaded legacy changes report for ${path.basename(versionPath)}`);
+                return {
+                    'all': {
+                        summary: legacyReport.summary,
+                        breaking: legacyReport.changes?.breaking || [],
+                        newEndpoints: legacyReport.changes?.newEndpoints || [],
+                        modifiedEndpoints: legacyReport.changes?.modifiedEndpoints || []
+                    }
+                };
+            }
+        } catch (error) {
+            console.warn(`⚠️  Error loading changes report: ${error.message}`);
+        }
+
+        return {};
+    }
+
+    /**
      * 전체 API 변경사항 배지 생성
      */
-    generateAllChangesBadge(latestVersion) {
-        if (!latestVersion || !latestVersion.changes) {
+    generateAllChangesBadge(latestVersion, serviceName) {
+        const versionPath = path.join(this.servicesDir, serviceName, 'versions', latestVersion?.version || '');
+        const groupedChanges = this.loadGroupedChanges(versionPath);
+        const allGroup = groupedChanges['all'];
+
+        if (!allGroup || !allGroup.summary) {
             return 'STABLE';
         }
 
-        const changes = latestVersion.changes;
-        if (changes.breaking_changes > 0) {
+        const summary = allGroup.summary;
+        if (summary.breakingChanges > 0) {
             return 'BREAKING';
-        } else if (changes.new_endpoints > 0) {
+        } else if (summary.newEndpoints > 0) {
             return 'NEW';
-        } else if (changes.modified_endpoints > 0) {
+        } else if (summary.modifiedEndpoints > 0) {
             return 'UPDATED';
         }
         return 'STABLE';
@@ -350,16 +386,29 @@ class ServiceIndexGenerator {
     /**
      * 공개 API 변경사항 배지 생성
      */
-    generateApiChangesBadge(latestVersion) {
-        if (!latestVersion || !latestVersion.changes) {
+    generateApiChangesBadge(latestVersion, serviceName) {
+        const versionPath = path.join(this.servicesDir, serviceName, 'versions', latestVersion?.version || '');
+        const groupedChanges = this.loadGroupedChanges(versionPath);
+        const apiGroup = groupedChanges['api'];
+
+        if (!apiGroup || !apiGroup.summary) {
+            // api 그룹이 없으면 all 그룹에서 fallback
+            const allGroup = groupedChanges['all'];
+            if (allGroup && allGroup.summary) {
+                const summary = allGroup.summary;
+                if (summary.breakingChanges > 0) {
+                    return 'BREAKING';
+                } else if (summary.newEndpoints > 0 || summary.modifiedEndpoints > 0) {
+                    return 'UPDATED';
+                }
+            }
             return 'STABLE';
         }
 
-        // 공개 API의 경우 보통 안정성을 강조
-        const changes = latestVersion.changes;
-        if (changes.breaking_changes > 0) {
+        const summary = apiGroup.summary;
+        if (summary.breakingChanges > 0) {
             return 'BREAKING';
-        } else if (changes.new_endpoints > 0 || changes.modified_endpoints > 0) {
+        } else if (summary.newEndpoints > 0 || summary.modifiedEndpoints > 0) {
             return 'UPDATED';
         }
         return 'STABLE';
@@ -368,18 +417,21 @@ class ServiceIndexGenerator {
     /**
      * 내부 API 변경사항 배지 생성
      */
-    generateInternalChangesBadge(latestVersion) {
-        if (!latestVersion || !latestVersion.changes) {
+    generateInternalChangesBadge(latestVersion, serviceName) {
+        const versionPath = path.join(this.servicesDir, serviceName, 'versions', latestVersion?.version || '');
+        const groupedChanges = this.loadGroupedChanges(versionPath);
+        const internalGroup = groupedChanges['internal'];
+
+        if (!internalGroup || !internalGroup.summary) {
             return 'STABLE';
         }
 
-        // 내부 API는 더 자주 변경될 수 있음
-        const changes = latestVersion.changes;
-        if (changes.breaking_changes > 0) {
+        const summary = internalGroup.summary;
+        if (summary.breakingChanges > 0) {
             return 'BREAKING';
-        } else if (changes.new_endpoints > 0) {
+        } else if (summary.newEndpoints > 0) {
             return 'NEW';
-        } else if (changes.modified_endpoints > 0) {
+        } else if (summary.modifiedEndpoints > 0) {
             return 'MODIFIED';
         }
         return 'STABLE';

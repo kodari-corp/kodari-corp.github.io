@@ -40,8 +40,24 @@ if [[ -f "$PREV_SPEC" ]]; then
 
   # Node.js가 설치되어 있다면 정교한 변경사항 탐지 실행
   if command -v node &> /dev/null && [[ -f "scripts/detect-changes.js" ]]; then
-    echo "🔬 Running detailed change analysis..."
-    node scripts/detect-changes.js "$PREV_SPEC" "$NEW_SPEC" "$TARGET_DIR/changes-report.json"
+    echo "🔬 Running grouped change analysis..."
+
+    # 이전 버전과 새 버전 디렉토리 경로
+    PREV_VERSION_DIR=$(dirname "$PREV_SPEC")
+    NEW_VERSION_DIR="$SPEC_DIR"
+
+    # 그룹별 변경사항 분석 실행
+    node -e "
+      const { DynamicGroupChangeDetector } = require('./scripts/detect-changes.js');
+
+      const detector = new DynamicGroupChangeDetector('$PREV_VERSION_DIR', '$NEW_VERSION_DIR');
+      detector.analyzeAllGroups();
+      detector.saveGroupedReport('$TARGET_DIR/changes-report-grouped.json');
+
+      console.log('✅ Grouped change analysis completed');
+    "
+
+    echo "📊 Grouped change analysis completed"
   else
     echo "📝 Basic change detection (Node.js script not available)"
 
@@ -65,8 +81,6 @@ if [[ -f "$PREV_SPEC" ]]; then
 }
 EOF
   fi
-
-  echo "📊 Change analysis completed"
 else
   echo "📝 First version for $SERVICE_NAME - no comparison possible"
 

@@ -364,4 +364,278 @@ if (require.main === module) {
     }
 }
 
-module.exports = ChangeDetector;
+/**
+ * 동적 그룹별 변경사항 탐지 클래스
+ * OpenAPI 스펙 파일들을 자동으로 감지하고 그룹별로 변경사항 분석
+ */
+class DynamicGroupChangeDetector {
+    constructor(oldVersionDir, newVersionDir) {
+        this.oldVersionDir = oldVersionDir;
+        this.newVersionDir = newVersionDir;
+        this.groupedChanges = {};
+        this.groups = {};
+    }
+
+    /**
+     * API 그룹 파일들 자동 감지
+     */
+    discoverGroups() {
+        console.log('🔍 Discovering API groups...');
+
+        // 새 버전에서 그룹 파일들 스캔
+        const newGroups = this.scanGroupFiles(this.newVersionDir);
+
+        // 이전 버전에서 대응되는 파일들 찾기
+        const oldGroups = this.oldVersionDir ? this.scanGroupFiles(this.oldVersionDir) : {};
+
+        // 그룹 매핑 생성
+        newGroups.forEach(group => {
+            const matchingOldGroup = oldGroups.find(oldGroup => oldGroup.name === group.name);
+
+            this.groups[group.name] = {
+                name: group.name,
+                displayName: this.generateDisplayName(group.name),
+                newPath: group.path,
+                oldPath: matchingOldGroup ? matchingOldGroup.path : null
+            };
+        });
+
+        console.log(`📊 Discovered ${Object.keys(this.groups).length} API groups:`, Object.keys(this.groups));
+        return this.groups;
+    }
+
+    /**
+     * 디렉토리에서 API 그룹 파일들 스캔
+     */
+    scanGroupFiles(directory) {
+        if (!fs.existsSync(directory)) {
+            return [];
+        }
+
+        try {
+            return fs.readdirSync(directory)
+                .filter(file => {
+                    // apiDocs-*.json 또는 apiDocs-*.yaml 패턴 매칭
+                    return (file.startsWith('apiDocs-') &&
+                           (file.endsWith('.json') || file.endsWith('.yaml') || file.endsWith('.yml')));
+                })
+                .map(file => ({
+                    name: this.extractGroupName(file),
+                    path: path.join(directory, file),
+                    file: file
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        } catch (error) {
+            console.warn(`⚠️  Error scanning directory ${directory}:`, error.message);
+            return [];
+        }
+    }
+
+    /**
+     * 파일명에서 그룹명 추출
+     */
+    extractGroupName(filename) {
+        // apiDocs-all.json -> all
+        // apiDocs-api.yaml -> api
+        // apiDocs-internal.json -> internal
+        return filename
+            .replace(/^apiDocs-/, '')
+            .replace(/\.(json|yaml|yml)$/, '');
+    }
+
+    /**
+     * 그룹명으로부터 표시용 이름 생성
+     */
+    generateDisplayName(groupName) {
+        const displayNames = {
+            'all': 'Complete API',
+            'api': 'Public API',
+            'internal': 'Internal API',
+            'admin': 'Admin API',
+            'mobile': 'Mobile API',
+            'partner': 'Partner API',
+            'webhook': 'Webhook API'
+        };
+
+        return displayNames[groupName] || `${groupName.charAt(0).toUpperCase()}${groupName.slice(1)} API`;
+    }
+
+    /**
+     * 모든 그룹의 변경사항 분석
+     */
+    analyzeAllGroups() {
+        console.log('🔬 Analyzing changes for all groups...');
+
+        // 그룹 자동 감지
+        this.discoverGroups();
+
+        // 각 그룹별로 변경사항 분석
+        Object.keys(this.groups).forEach(groupName => {
+            const group = this.groups[groupName];
+
+            console.log(`📋 Analyzing group: ${group.displayName} (${groupName})`);
+
+            try {
+                const detector = new ChangeDetector(group.oldPath, group.newPath);
+                const changes = detector.analyze();
+
+                this.groupedChanges[groupName] = {
+                    ...changes,
+                    groupInfo: {
+                        name: groupName,
+                        displayName: group.displayName,
+                        hasOldVersion: !!group.oldPath,
+                        newFilePath: group.newPath,
+                        oldFilePath: group.oldPath
+                    }
+                };
+
+                console.log(`  ✅ ${group.displayName}: ${changes.summary.breakingChanges} breaking, ${changes.summary.newEndpoints} new, ${changes.summary.modifiedEndpoints} modified`);
+
+            } catch (error) {
+                console.error(`  ❌ Error analyzing ${groupName}:`, error.message);
+
+                // 에러 발생시 기본값 설정
+                this.groupedChanges[groupName] = {
+                    breaking: [],
+                    newEndpoints: [],
+                    modifiedEndpoints: [],
+                    summary: {
+                        breakingChanges: 0,
+                        newEndpoints: 0,
+                        modifiedEndpoints: 0,
+                        riskLevel: 'unknown'
+                    },
+                    groupInfo: {
+                        name: groupName,
+                        displayName: group.displayName,
+                        hasOldVersion: !!group.oldPath,
+                        error: error.message
+                    }
+                };
+            }
+        });
+
+        return this.groupedChanges;
+    }
+
+    /**
+     * 그룹별 변경사항 리포트 생성
+     */
+    generateGroupedReport() {
+        const report = {
+            generatedAt: new Date().toISOString(),
+            totalGroups: Object.keys(this.groupedChanges).length,
+            groups: this.groupedChanges,
+            summary: this.calculateOverallSummary()
+        };
+
+        console.log('\n📊 === 그룹별 변경사항 리포트 ===');
+        console.log(`📦 Total Groups: ${report.totalGroups}`);
+        console.log(`🚨 Overall Breaking Changes: ${report.summary.totalBreakingChanges}`);
+        console.log(`🆕 Overall New Endpoints: ${report.summary.totalNewEndpoints}`);
+        console.log(`📝 Overall Modified Endpoints: ${report.summary.totalModifiedEndpoints}`);
+        console.log(`⚠️  Overall Risk Level: ${report.summary.overallRiskLevel.toUpperCase()}`);
+
+        Object.keys(this.groupedChanges).forEach(groupName => {
+            const group = this.groupedChanges[groupName];
+            console.log(`\n📋 ${group.groupInfo.displayName}:`);
+            console.log(`   Breaking: ${group.summary.breakingChanges}, New: ${group.summary.newEndpoints}, Modified: ${group.summary.modifiedEndpoints}, Risk: ${group.summary.riskLevel}`);
+        });
+
+        return report;
+    }
+
+    /**
+     * 전체 요약 통계 계산
+     */
+    calculateOverallSummary() {
+        const summary = {
+            totalBreakingChanges: 0,
+            totalNewEndpoints: 0,
+            totalModifiedEndpoints: 0,
+            overallRiskLevel: 'low'
+        };
+
+        Object.values(this.groupedChanges).forEach(group => {
+            summary.totalBreakingChanges += group.summary.breakingChanges;
+            summary.totalNewEndpoints += group.summary.newEndpoints;
+            summary.totalModifiedEndpoints += group.summary.modifiedEndpoints;
+        });
+
+        // 전체 위험도 계산
+        if (summary.totalBreakingChanges > 10) {
+            summary.overallRiskLevel = 'critical';
+        } else if (summary.totalBreakingChanges > 5) {
+            summary.overallRiskLevel = 'high';
+        } else if (summary.totalBreakingChanges > 0 || summary.totalModifiedEndpoints > 20) {
+            summary.overallRiskLevel = 'medium';
+        }
+
+        return summary;
+    }
+
+    /**
+     * 그룹별 리포트 저장
+     */
+    saveGroupedReport(outputPath) {
+        const report = this.generateGroupedReport();
+
+        // 디렉토리가 없으면 생성
+        const outputDir = path.dirname(outputPath);
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+            console.log(`📁 디렉토리 생성됨: ${outputDir}`);
+        }
+
+        fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
+        console.log(`\n💾 그룹별 리포트 저장됨: ${outputPath}`);
+
+        // 기존 호환성을 위한 통합 리포트도 생성
+        const legacyReport = this.generateLegacyCompatibleReport(report);
+        const legacyPath = outputPath.replace('-grouped.json', '.json');
+        fs.writeFileSync(legacyPath, JSON.stringify(legacyReport, null, 2));
+        console.log(`📄 호환성 리포트 저장됨: ${legacyPath}`);
+    }
+
+    /**
+     * 기존 시스템 호환성을 위한 통합 리포트 생성
+     */
+    generateLegacyCompatibleReport(groupedReport) {
+        // 'all' 그룹이 있으면 그것을 사용, 없으면 전체 통합
+        const allGroup = this.groupedChanges['all'];
+
+        if (allGroup) {
+            return {
+                generatedAt: groupedReport.generatedAt,
+                summary: allGroup.summary,
+                changes: {
+                    breaking: allGroup.breaking,
+                    newEndpoints: allGroup.newEndpoints,
+                    modifiedEndpoints: allGroup.modifiedEndpoints
+                }
+            };
+        } else {
+            // 모든 그룹 통합
+            const integrated = {
+                breaking: [],
+                newEndpoints: [],
+                modifiedEndpoints: []
+            };
+
+            Object.values(this.groupedChanges).forEach(group => {
+                integrated.breaking.push(...group.breaking);
+                integrated.newEndpoints.push(...group.newEndpoints);
+                integrated.modifiedEndpoints.push(...group.modifiedEndpoints);
+            });
+
+            return {
+                generatedAt: groupedReport.generatedAt,
+                summary: groupedReport.summary,
+                changes: integrated
+            };
+        }
+    }
+}
+
+module.exports = { ChangeDetector, DynamicGroupChangeDetector };

@@ -128,6 +128,19 @@
   // Load and display changes
   async function loadChanges() {
     try {
+      // 먼저 grouped 변경사항을 시도
+      const groupedResponse = await fetch('changes-report-grouped.json');
+      if (groupedResponse.ok) {
+        const groupedData = await groupedResponse.json();
+        displayGroupedChanges(groupedData);
+        return;
+      }
+    } catch (error) {
+      console.log('No grouped changes data, trying legacy format');
+    }
+    
+    try {
+      // 레거시 변경사항 로드
       const response = await fetch('changes-report.json');
       const changesData = await response.json();
       displayChanges(changesData);
@@ -135,6 +148,32 @@
       console.log('No changes data available');
       document.getElementById('changeSummary').style.display = 'none';
     }
+  }
+
+  function displayGroupedChanges(groupedData) {
+    // 현재 파일명에서 그룹 이름 추출
+    const currentPath = window.location.pathname;
+    const fileName = currentPath.split('/').pop().replace('.html', '');
+    
+    let groupName = 'all'; // 기본값
+    if (fileName.includes('apiDocs-api')) {
+      groupName = 'api';
+    } else if (fileName.includes('apiDocs-internal')) {
+      groupName = 'internal';
+    } else if (fileName.includes('apiDocs-all')) {
+      groupName = 'all';
+    } else if (fileName === 'index') {
+      groupName = 'all'; // index.html은 보통 all 그룹
+    }
+    
+    const groupData = groupedData.groups && groupedData.groups[groupName];
+    if (!groupData) {
+      console.log(`No data found for group: ${groupName}`);
+      document.getElementById('changeSummary').style.display = 'none';
+      return;
+    }
+    
+    displayChanges(groupData);
   }
 
   function displayChanges(changesData) {

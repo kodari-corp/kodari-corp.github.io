@@ -28,14 +28,67 @@ fi
 echo "📋 Generating docs for: $SERVICE_NAME $VERSION"
 
 # 모든 OpenAPI 스펙 파일에 대해 HTML 생성
-for spec_file in *.yaml *.yml *.json; do
-  if [[ -f "$spec_file" && "$spec_file" != "service-metadata.json" && "$spec_file" != "changes-report.json" ]]; then
+# Create array of spec files to avoid subshell issues
+echo "🔍 Debug: Files found in directory:"
+ls -la *.{yaml,yml,json} 2>/dev/null | head -10 || echo "No spec files found"
+
+# Get all spec files into an array
+spec_files=()
+while IFS= read -r -d '' file; do
+  filename=$(basename "$file")
+  if [[ "$filename" != "service-metadata.json" && "$filename" != "changes-report.json" && "$filename" != "changes-report-grouped.json" ]]; then
+    spec_files+=("$filename")
+  fi
+done < <(find . -maxdepth 1 \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) -type f -print0)
+
+echo "🔍 Debug: Will process ${#spec_files[@]} files: ${spec_files[*]}"
+
+# Process each spec file
+for spec_file in "${spec_files[@]}"; do
+  echo "✅ Debug: Processing: $spec_file"
     filename=$(basename "$spec_file" | sed 's/\.[^.]*$//')
 
     echo "🔄 Processing: $spec_file → ${filename}.html"
 
-    # Redoc CLI가 설치되어 있는지 확인
-    if command -v redoc-cli &> /dev/null; then
+    # 향상된 템플릿 사용을 위해 외부 도구보다 템플릿 우선 적용
+    FORCE_TEMPLATE=${FORCE_TEMPLATE:-true}
+    echo "🔍 Debug: FORCE_TEMPLATE is set to: $FORCE_TEMPLATE"
+
+    if [[ "$FORCE_TEMPLATE" == "true" ]]; then
+      echo "🎨 Using enhanced redoc-template.html (forced)"
+
+      # redoc-template.html 경로 찾기 (현재 디렉토리에서 상대 경로)
+      TEMPLATE_PATH="../../../../templates/redoc-template.html"
+      if [[ ! -f "$TEMPLATE_PATH" ]]; then
+        TEMPLATE_PATH="../../../templates/redoc-template.html"
+      fi
+      if [[ ! -f "$TEMPLATE_PATH" ]]; then
+        TEMPLATE_PATH="../../templates/redoc-template.html"
+      fi
+      if [[ ! -f "$TEMPLATE_PATH" ]]; then
+        TEMPLATE_PATH="../templates/redoc-template.html"
+      fi
+
+      if [[ ! -f "$TEMPLATE_PATH" ]]; then
+        echo "⚠️  redoc-template.html not found at $TEMPLATE_PATH, falling back to external tools"
+        FORCE_TEMPLATE=false
+      else
+        echo "✨ Applying enhanced template with changes panel from: $TEMPLATE_PATH"
+
+        # 템플릿에서 변수 치환하여 HTML 생성
+        sed -e "s/{{SERVICE_NAME}}/$SERVICE_NAME/g" \
+            -e "s/{{VERSION}}/$VERSION/g" \
+            -e "s/{{SERVICE_DESCRIPTION}}/API documentation with enhanced change tracking/g" \
+            -e "s/{{SERVICE_LOGO}}/📚/g" \
+            -e "s/{{GENERATED_AT}}/$GENERATED_AT/g" \
+            -e "s/{{CHANGE_SUMMARY_CLASS}}/change-summary/g" \
+            -e "s/{{CHANGE_SUMMARY_TITLE}}/What's New in $VERSION/g" \
+            -e "s/'openapi.json'/'$spec_file'/g" \
+            "$TEMPLATE_PATH" > "${filename}.html"
+      fi
+    fi
+
+    if [[ "$FORCE_TEMPLATE" != "true" ]] && command -v redoc-cli &> /dev/null; then
       redoc-cli build "$spec_file" \
         --output "${filename}.html" \
         --title "$SERVICE_NAME API Documentation - ${filename} ($VERSION)" \
@@ -45,21 +98,9 @@ for spec_file in *.yaml *.yml *.json; do
         --output "${filename}.html" \
         --title "$SERVICE_NAME API Documentation - ${filename} ($VERSION)"
     else
-      echo "🎨 Using enhanced redoc-template.html"
-
-      # redoc-template.html 경로 찾기
-      TEMPLATE_PATH="../../../templates/redoc-template.html"
-      if [[ ! -f "$TEMPLATE_PATH" ]]; then
-        TEMPLATE_PATH="../../templates/redoc-template.html"
-      fi
-      if [[ ! -f "$TEMPLATE_PATH" ]]; then
-        TEMPLATE_PATH="../templates/redoc-template.html"
-      fi
-
-      if [[ ! -f "$TEMPLATE_PATH" ]]; then
-        echo "⚠️  redoc-template.html not found, falling back to basic wrapper"
-        # 기본 래퍼 생성 (폴백)
-        cat > "${filename}.html" << EOF
+      # 기본 래퍼 생성 (모든 도구가 없을 때의 폴백)
+      echo "⚠️  No Redoc tools available, creating basic wrapper"
+      cat > "${filename}.html" << EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -83,24 +124,70 @@ for spec_file in *.yaml *.yml *.json; do
 </body>
 </html>
 EOF
-      else
-        echo "✨ Applying enhanced template with changes panel"
+    fi
 
-        # 템플릿에서 변수 치환하여 HTML 생성
-        sed -e "s/{{SERVICE_NAME}}/$SERVICE_NAME/g" \
-            -e "s/{{VERSION}}/$VERSION/g" \
-            -e "s/{{SERVICE_DESCRIPTION}}/API documentation with enhanced change tracking/g" \
-            -e "s/{{SERVICE_LOGO}}/📚/g" \
-            -e "s/{{GENERATED_AT}}/$GENERATED_AT/g" \
-            -e "s/{{CHANGE_SUMMARY_CLASS}}/change-summary/g" \
-            -e "s/{{CHANGE_SUMMARY_TITLE}}/What's New in $VERSION/g" \
-            -e "s/'openapi.json'/'$spec_file'/g" \
-            "$TEMPLATE_PATH" > "${filename}.html"
+    # 템플릿이 사용된 경우에만 검증 수행
+    if [[ "$FORCE_TEMPLATE" == "true" && -f "${filename}.html" ]]; then
+
+      # 템플릿 변수 치환 검증 및 개선
+      UNRESOLVED_VARS=$(grep -o "{{[^}]*}}" "${filename}.html" 2>/dev/null | sort | uniq)
+      if [[ -n "$UNRESOLVED_VARS" ]]; then
+        echo "⚠️  Warning: Unresolved template variables found in ${filename}.html:"
+        echo "$UNRESOLVED_VARS" | while read -r var; do
+          echo "   - $var"
+        done
+        echo "   This may cause display issues. Attempting to resolve common variables..."
+
+        # 누락된 공통 변수에 대한 기본값 적용
+        sed -i.bak \
+          -e "s/{{SPEC_FILE}}/apiDocs-all.yaml/g" \
+          -e "s/{{API_GROUPS}}/all/g" \
+          -e "s/{{DOCUMENTATION_TYPE}}/Complete API Documentation/g" \
+          -e "s/{{SERVICE_TITLE}}/$SERVICE_NAME API/g" \
+          "${filename}.html"
+
+        # 재검증
+        REMAINING_VARS=$(grep -o "{{[^}]*}}" "${filename}.html" 2>/dev/null | sort | uniq)
+        if [[ -n "$REMAINING_VARS" ]]; then
+          echo "   ⚠️  Still unresolved after defaults:"
+          echo "$REMAINING_VARS" | while read -r var; do
+            echo "     - $var"
+          done
+        else
+          echo "   ✅ All variables resolved with defaults"
+        fi
+        rm -f "${filename}.html.bak"
+      else
+        echo "✅ All template variables resolved successfully in ${filename}.html"
       fi
     fi
 
+    # 변경사항 데이터 파일 존재 여부 확인 및 검증
+    if [[ -f "changes-report.json" ]]; then
+      echo "📊 Validating changes-report.json..."
+      if jq empty changes-report.json 2>/dev/null; then
+        CHANGES_COUNT=$(jq -r '.summary.newEndpoints + .summary.modifiedEndpoints + .summary.breakingChanges' changes-report.json 2>/dev/null || echo "0")
+        echo "   ✅ Valid JSON with $CHANGES_COUNT total changes"
+      else
+        echo "   ❌ Invalid JSON format in changes-report.json"
+      fi
+    else
+      echo "   ⚠️  No changes-report.json found - change summary will be empty"
+    fi
+
+    if [[ -f "changes-report-grouped.json" ]]; then
+      echo "📊 Validating changes-report-grouped.json..."
+      if jq empty changes-report-grouped.json 2>/dev/null; then
+        GROUPS=$(jq -r '.groups | keys[]' changes-report-grouped.json 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+        echo "   ✅ Valid grouped JSON with groups: $GROUPS"
+      else
+        echo "   ❌ Invalid JSON format in changes-report-grouped.json"
+      fi
+    else
+      echo "   ℹ️  No changes-report-grouped.json found - using legacy format only"
+    fi
+
     echo "✅ Generated: ${filename}.html"
-  fi
 done
 
 # 메인 index.html 생성 (apiDocs-all 기준)

@@ -177,33 +177,50 @@
   }
 
   function displayChanges(changesData) {
+    console.log('=== displayChanges 호출 ===');
+    console.log('changesData:', changesData);
+
     const summary = changesData.summary || {};
-    const changes = changesData.changes || {};
+    console.log('summary:', summary);
+
+    // 그룹화된 데이터 구조에 맞게 수정
+    const breaking = changesData.breaking || [];
+    const newEndpoints = changesData.newEndpoints || [];
+    const modifiedEndpoints = changesData.modifiedEndpoints || [];
+
+    console.log('breaking:', breaking);
+    console.log('newEndpoints:', newEndpoints);
+    console.log('modifiedEndpoints:', modifiedEndpoints);
+
     let html = '';
 
     if (summary.breakingChanges > 0 || summary.newEndpoints > 0 || summary.modifiedEndpoints > 0) {
+      console.log('변경사항이 있습니다. HTML 생성 중...');
 
       // Breaking Changes
-      if (changes.breaking && changes.breaking.length > 0) {
+      if (breaking && breaking.length > 0) {
         html += '<div class="change-type breaking">🚨 Breaking Changes</div>';
-        changes.breaking.slice(0, 5).forEach(change => {
+        breaking.slice(0, 5).forEach(change => {
           html += `<div class="change-item">• <strong>${change.method?.toUpperCase() || ''}</strong> ${change.path || ''} - ${change.description || change.summary || ''}</div>`;
         });
       }
 
       // New Endpoints
-      if (changes.newEndpoints && changes.newEndpoints.length > 0) {
+      if (newEndpoints && newEndpoints.length > 0) {
+        console.log('새로운 엔드포인트 HTML 생성 중...');
         html += '<div class="change-type new">✨ New Endpoints</div>';
-        changes.newEndpoints.slice(0, 5).forEach(endpoint => {
-          html += `<div class="change-item">• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path} - ${endpoint.summary}</div>`;
+        newEndpoints.slice(0, 5).forEach(endpoint => {
+          const endpointHtml = `<div class="change-item">• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path} - ${endpoint.summary}</div>`;
+          console.log('엔드포인트 HTML:', endpointHtml);
+          html += endpointHtml;
         });
       }
 
       // Modified Endpoints
-      if (changes.modifiedEndpoints && changes.modifiedEndpoints.length > 0) {
+      if (modifiedEndpoints && modifiedEndpoints.length > 0) {
         html += '<div class="change-type modified">🔄 Modified Endpoints</div>';
-        changes.modifiedEndpoints.slice(0, 5).forEach(endpoint => {
-          html += `<div class="change-item">• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path} - ${endpoint.summary}</div>`;
+        modifiedEndpoints.slice(0, 5).forEach(endpoint => {
+          html += `<div class="change-item">• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path} - ${endpoint.summary || endpoint.changes?.join(', ') || ''}</div>`;
         });
       }
 
@@ -215,10 +232,21 @@
       `;
 
     } else {
+      console.log('변경사항이 없습니다.');
       html = '<div class="no-changes">이 버전에는 변경사항이 없습니다.</div>';
     }
 
-    document.getElementById('changeDetails').innerHTML = html;
+    console.log('생성된 HTML:', html);
+    const changeDetailsElement = document.getElementById('changeDetails');
+    console.log('changeDetails 엘리먼트:', changeDetailsElement);
+
+    if (changeDetailsElement) {
+      changeDetailsElement.innerHTML = html;
+      console.log('HTML이 성공적으로 삽입되었습니다.');
+      console.log('삽입된 내용:', changeDetailsElement.innerHTML);
+    } else {
+      console.error('changeDetails 엘리먼트를 찾을 수 없습니다!');
+    }
   }
 
   // Initialize

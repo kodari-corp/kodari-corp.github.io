@@ -52,6 +52,38 @@ jobs:
               TARGET_DIR="services/$SERVICE_NAME/dev-branches/$VERSION"
             fi
 
+            # 중복 감지: 기존 버전과 스펙 파일 비교
+            ARCHIVE_DIR="archive/$SERVICE_NAME/$DEPLOY_TYPE/$VERSION"
+            if [[ -d "$ARCHIVE_DIR" ]]; then
+              echo "⚠️  Version $VERSION already exists in archive, checking for changes..."
+
+              # 메인 스펙 파일 찾기 (YAML 우선, 없으면 JSON)
+              INCOMING_SPEC=""
+              ARCHIVED_SPEC=""
+
+              if [[ -f "$SPEC_DIR/apiDocs-all.yaml" ]]; then
+                INCOMING_SPEC="$SPEC_DIR/apiDocs-all.yaml"
+                ARCHIVED_SPEC="$ARCHIVE_DIR/apiDocs-all.yaml"
+              elif [[ -f "$SPEC_DIR/apiDocs-all.json" ]]; then
+                INCOMING_SPEC="$SPEC_DIR/apiDocs-all.json"
+                ARCHIVED_SPEC="$ARCHIVE_DIR/apiDocs-all.json"
+              fi
+
+              # 스펙 파일이 동일하면 skip
+              if [[ -n "$INCOMING_SPEC" ]] && [[ -f "$ARCHIVED_SPEC" ]]; then
+                if diff -q "$INCOMING_SPEC" "$ARCHIVED_SPEC" > /dev/null 2>&1; then
+                  echo "✅ Identical spec detected - skipping $SERVICE_NAME $VERSION"
+                  echo "   Archive: $ARCHIVED_SPEC"
+                  echo "   No processing needed, cleaning up incoming files"
+                  rm -rf "$SPEC_DIR"
+                  continue
+                else
+                  echo "⚠️  Spec content differs - this will overwrite existing version!"
+                  echo "   Consider using a new version number for content changes"
+                fi
+              fi
+            fi
+
             # 이전 버전과 변경사항 비교 (Node.js 버전 - 개선된 에러 핸들링)
             echo "🔍 Detecting changes for $SERVICE_NAME $VERSION"
             node scripts/detect-and-analyze-changes.js "$SERVICE_NAME" "$SPEC_DIR" "$TARGET_DIR" || echo "Change detection failed, continuing..."

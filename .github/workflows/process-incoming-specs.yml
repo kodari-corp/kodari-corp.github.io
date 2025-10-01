@@ -52,9 +52,9 @@ jobs:
               TARGET_DIR="services/$SERVICE_NAME/dev-branches/$VERSION"
             fi
 
-            # 이전 버전과 변경사항 비교 (중앙집중식!)
+            # 이전 버전과 변경사항 비교 (Node.js 버전 - 개선된 에러 핸들링)
             echo "🔍 Detecting changes for $SERVICE_NAME $VERSION"
-            bash scripts/detect-and-analyze-changes.sh "$SERVICE_NAME" "$SPEC_DIR" "$TARGET_DIR" || echo "Change detection failed, continuing..."
+            node scripts/detect-and-analyze-changes.js "$SERVICE_NAME" "$SPEC_DIR" "$TARGET_DIR" || echo "Change detection failed, continuing..."
 
             # 스펙 파일 이동
             echo "📁 Moving files to $TARGET_DIR"
@@ -63,9 +63,9 @@ jobs:
             cp "$SPEC_DIR"/*.json "$TARGET_DIR/" 2>/dev/null || echo "No JSON files to copy"
             cp "$SERVICE_METADATA" "$TARGET_DIR/"
 
-            # HTML 문서 생성
+            # HTML 문서 생성 (Node.js 버전 - 클래스 기반 Generator)
             echo "🎨 Generating HTML documentation"
-            bash scripts/generate-html-docs.sh "$TARGET_DIR" || echo "HTML generation failed, continuing..."
+            node scripts/generate-html-docs.js "$TARGET_DIR" || echo "HTML generation failed, continuing..."
 
             # latest 링크 업데이트 (릴리스인 경우)
             if [[ "$DEPLOY_TYPE" == "release" ]]; then
@@ -75,11 +75,22 @@ jobs:
               ln -sf "versions/$VERSION" "services/$SERVICE_NAME/latest"
             fi
 
-            # 처리 완료된 incoming 파일 제거
+            # 처리 완료된 incoming 파일을 archive로 이동 (재생성 및 히스토리 추적용)
+            echo "📦 Archiving incoming files for future regeneration"
+            ARCHIVE_DIR="archive/$SERVICE_NAME/$DEPLOY_TYPE/$VERSION"
+            mkdir -p "$ARCHIVE_DIR"
+
+            # incoming 파일을 archive로 복사
+            cp -r "$SPEC_DIR"/* "$ARCHIVE_DIR/" 2>/dev/null || echo "No files to archive"
+
+            # archive 타임스탬프 기록
+            echo "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > "$ARCHIVE_DIR/.archived"
+
+            # incoming 파일 제거
             echo "🧹 Cleaning up incoming files"
             rm -rf "$SPEC_DIR"
 
-            echo "✅ Completed processing $SERVICE_NAME $VERSION"
+            echo "✅ Completed processing $SERVICE_NAME $VERSION (archived to $ARCHIVE_DIR)"
           else
             echo "⚠️  No service metadata found in $SPEC_DIR"
           fi

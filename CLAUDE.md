@@ -12,8 +12,8 @@ node scripts/generate-main-index.js
 # Generate service-specific index pages
 node scripts/generate-service-index.js [SERVICE_NAME]
 
-# Convert OpenAPI specs to HTML documentation
-scripts/generate-html-docs.sh [TARGET_DIR]
+# Convert OpenAPI specs to HTML documentation (Node.js)
+node scripts/generate-html-docs.js [TARGET_DIR]
 
 # Generate comprehensive changelog
 node scripts/generate-changelog.js
@@ -24,11 +24,29 @@ node scripts/update-all-timelines.js
 
 ### Change Detection and Analysis
 ```bash
-# Detect changes between API versions
-scripts/detect-and-analyze-changes.sh [SERVICE_NAME] [SPEC_DIR] [TARGET_DIR]
+# Detect changes between API versions (Node.js)
+node scripts/detect-and-analyze-changes.js [SERVICE_NAME] [SPEC_DIR] [TARGET_DIR]
 
 # Direct change analysis (Node.js)
 node scripts/detect-changes.js [OLD_SPEC] [NEW_SPEC] [OUTPUT_JSON]
+```
+
+### Archive Management and Regeneration
+```bash
+# Regenerate all documentation from archive
+node scripts/regenerate-from-archive.js
+
+# Regenerate specific service
+node scripts/regenerate-from-archive.js gloview-api
+
+# Regenerate specific version
+node scripts/regenerate-from-archive.js gloview-api v0.4.1
+
+# Options
+node scripts/regenerate-from-archive.js --changes-only  # Only rerun change analysis
+node scripts/regenerate-from-archive.js --docs-only     # Only regenerate HTML docs
+node scripts/regenerate-from-archive.js --dry-run       # Simulate without changes
+node scripts/regenerate-from-archive.js --force         # Skip confirmation prompt
 ```
 
 ### Local Development
@@ -48,10 +66,22 @@ npx http-server .
 ### Multi-Stage Generation Pipeline
 The system follows a sophisticated 4-stage pipeline architecture:
 
-1. **Detection Stage**: `detect-changes.js` performs OpenAPI spec comparison using structural analysis to identify breaking changes, new endpoints, and modifications
-2. **Generation Stage**: `generate-html-docs.sh` converts OpenAPI specs to HTML using Redoc with fallback template system
+1. **Detection Stage**: `detect-and-analyze-changes.js` (Node.js) performs OpenAPI spec comparison using structural analysis to identify breaking changes, new endpoints, and modifications
+2. **Generation Stage**: `generate-html-docs.js` (Node.js) converts OpenAPI specs to HTML using Redoc with fallback template system
 3. **Integration Stage**: Generator classes (`MainIndexGenerator`, `ServiceIndexGenerator`, `ChangelogGenerator`) aggregate data across services and versions
 4. **Aggregation Stage**: Timeline and changelog systems provide historical views and change tracking
+
+### Archive and Regeneration System
+The system preserves all incoming OpenAPI specs in an archive directory for reproducible documentation regeneration:
+
+- **Archiving**: GitHub workflow automatically copies incoming specs to `archive/{service}/{deploy_type}/{version}/` before processing
+- **Regeneration**: `regenerate-from-archive.js` script can rebuild all documentation from archived specs
+- **Use Cases**:
+  - Template modifications requiring full documentation rebuild
+  - Script improvements needing reapplication to historical versions
+  - Change analysis re-execution with enhanced algorithms
+  - Version recovery and rollback scenarios
+- **Storage**: Text-based YAML/JSON files compress efficiently in Git (actual storage ~30-50% of estimates)
 
 ### Template Variable Substitution System
 All HTML templates use `{{VARIABLE_NAME}}` syntax with context-aware substitution:
@@ -69,12 +99,23 @@ services/[SERVICE_NAME]/
 ├── versions/         # Historical versions by semantic version
 ├── dev-branches/     # Development branch documentation
 └── index.html        # Service landing page
+
+archive/[SERVICE_NAME]/
+├── releases/         # Archived release versions
+│   └── [VERSION]/
+│       ├── apiDocs-all.yaml/json
+│       ├── apiDocs-api.json (optional)
+│       ├── apiDocs-internal.json (optional)
+│       ├── service-metadata.json
+│       └── .archived  # Archive timestamp
+└── dev-branches/     # Archived dev branch versions
 ```
 
 Key files per version:
 - `apiDocs-all.yaml/json`: Complete OpenAPI specification
 - `service-metadata.json`: Version info, generation timestamps, service details
 - `changes-report.json`: Structured change analysis from `ChangeDetector` class
+- `changes-report-grouped.json`: Grouped change analysis (all/api/internal)
 
 ### Jekyll + GitHub Pages Integration
 The system generates static sites deployable to GitHub Pages:
@@ -93,9 +134,10 @@ All generation scripts follow a consistent class-based pattern:
 - Extensive console logging with emoji prefixes for status tracking
 
 ### Error Handling Strategy
-- **Bash scripts**: Check prerequisites, provide fallbacks, return appropriate exit codes
 - **Node.js scripts**: Try-catch with service isolation (one service failure doesn't stop others)
 - **Template system**: Graceful degradation when external tools (redoc-cli) unavailable
+- **Archive system**: Preserve originals for recovery, enable reproducible regeneration
+- **Migration**: Bash scripts deprecated (scripts/*.sh.deprecated), scheduled for removal 2024-11-01
 
 ### Change Detection Algorithm
 `ChangeDetector` class performs sophisticated OpenAPI comparison:

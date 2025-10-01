@@ -30,8 +30,8 @@ jobs:
       run: |
         echo "🔍 Searching for new incoming specs..."
 
-        # incoming 디렉토리에서 새로운 스펙 파일 찾기
-        find incoming -name ".trigger" 2>/dev/null | while read trigger_file; do
+        # incoming 디렉토리에서 새로운 스펙 파일 찾기 및 버전 순서로 정렬
+        find incoming -name ".trigger" 2>/dev/null | sort -V | while read trigger_file; do
 
           SPEC_DIR=$(dirname "$trigger_file")
           SERVICE_METADATA="$SPEC_DIR/service-metadata.json"

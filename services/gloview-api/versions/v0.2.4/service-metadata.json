@@ -1,0 +1,10 @@
+{
+  "service_name": "gloview-api",
+  "version": "v0.2.4",
+  "deploy_type": "release",
+  "generated_at": "2025-09-03T21:53:45+09:00",
+  "commit_sha": "8f18fa5c97072d1b6269f676d325dfa7cfdc3a96",
+  "source_repo": "kodari-corp/gloview",
+  "branch": "main",
+  "source_url": "https://github.com/kodari-corp/gloview/commit/8f18fa5c97072d1b6269f676d325dfa7cfdc3a96"
+}

@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2025-10-03T02:52:22.072Z",
+  "summary": {
+    "breakingChanges": 0,
+    "newEndpoints": 1,
+    "modifiedEndpoints": 0,
+    "riskLevel": "low"
+  },
+  "changes": {
+    "breaking": [],
+    "newEndpoints": [
+      {
+        "path": "/api/signout",
+        "method": "DELETE",
+        "summary": "사용자 탈퇴"
+      }
+    ],
+    "modifiedEndpoints": []
+  }
+}

@@ -1,9 +1,9 @@
 {
-  "lastUpdated": "2025-10-03T01:23:31.387Z",
+  "lastUpdated": "2025-10-03T02:11:32.435Z",
   "services": [
     {
       "name": "gloview-api",
-      "versions": 3,
+      "versions": 1,
       "timelineFile": "gloview-api-timeline.json"
     }
   ]

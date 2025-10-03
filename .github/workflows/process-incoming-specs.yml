@@ -45,16 +45,21 @@ jobs:
 
             echo "🔄 Processing $SERVICE_NAME $VERSION ($DEPLOY_TYPE)"
 
-            # 대상 디렉토리 결정
+            # deploy_type 정규화 (release → releases, dev-branch → dev-branches)
+            ARCHIVE_DEPLOY_TYPE="$DEPLOY_TYPE"
             if [[ "$DEPLOY_TYPE" == "release" ]]; then
+              ARCHIVE_DEPLOY_TYPE="releases"
               TARGET_DIR="services/$SERVICE_NAME/versions/$VERSION"
+            elif [[ "$DEPLOY_TYPE" == "dev-branch" ]]; then
+              ARCHIVE_DEPLOY_TYPE="dev-branches"
+              TARGET_DIR="services/$SERVICE_NAME/dev-branches/$VERSION"
             else
               TARGET_DIR="services/$SERVICE_NAME/dev-branches/$VERSION"
             fi
 
-            # 중복 감지: 기존 버전과 스펙 파일 비교
-            ARCHIVE_DIR="archive/$SERVICE_NAME/$DEPLOY_TYPE/$VERSION"
-            if [[ -d "$ARCHIVE_DIR" ]]; then
+            # 중복 감지: Archive와 비교하여 동일 스펙이면 skip
+            ARCHIVE_CHECK_DIR="archive/$SERVICE_NAME/$ARCHIVE_DEPLOY_TYPE/$VERSION"
+            if [[ -d "$ARCHIVE_CHECK_DIR" ]]; then
               echo "⚠️  Version $VERSION already exists in archive, checking for changes..."
 
               # 메인 스펙 파일 찾기 (YAML 우선, 없으면 JSON)
@@ -63,10 +68,10 @@ jobs:
 
               if [[ -f "$SPEC_DIR/apiDocs-all.yaml" ]]; then
                 INCOMING_SPEC="$SPEC_DIR/apiDocs-all.yaml"
-                ARCHIVED_SPEC="$ARCHIVE_DIR/apiDocs-all.yaml"
+                ARCHIVED_SPEC="$ARCHIVE_CHECK_DIR/apiDocs-all.yaml"
               elif [[ -f "$SPEC_DIR/apiDocs-all.json" ]]; then
                 INCOMING_SPEC="$SPEC_DIR/apiDocs-all.json"
-                ARCHIVED_SPEC="$ARCHIVE_DIR/apiDocs-all.json"
+                ARCHIVED_SPEC="$ARCHIVE_CHECK_DIR/apiDocs-all.json"
               fi
 
               # 스펙 파일이 동일하면 skip
@@ -109,7 +114,7 @@ jobs:
 
             # 처리 완료된 incoming 파일을 archive로 이동 (재생성 및 히스토리 추적용)
             echo "📦 Archiving incoming files for future regeneration"
-            ARCHIVE_DIR="archive/$SERVICE_NAME/$DEPLOY_TYPE/$VERSION"
+            ARCHIVE_DIR="archive/$SERVICE_NAME/$ARCHIVE_DEPLOY_TYPE/$VERSION"
             mkdir -p "$ARCHIVE_DIR"
 
             # incoming 파일을 archive로 복사
@@ -131,31 +136,25 @@ jobs:
     - name: Update version timeline
       run: |
         echo "📊 Updating version timeline data for all services"
-
-        # 타임라인 데이터 생성을 위한 추가 dependencies 설치
-        npm install jq
-
-        # 모든 서비스의 타임라인 데이터 업데이트
-        node scripts/update-all-timelines.js ./services ./assets/data
-
+        node scripts/update-all-timelines.js
         echo "✅ Timeline data generation completed"
 
-        # 서비스 인덱스 페이지 생성 (타임라인 통합)
+    - name: Generate service index pages
+      run: |
         echo "🏗️  Generating service index pages with timeline integration"
-        node scripts/generate-service-index.js ./services ./templates ./assets
-
+        node scripts/generate-service-index.js
         echo "✅ Service index pages generation completed"
 
     - name: Update main index page
       run: |
         echo "🏠 Updating main index page with latest versions"
-        node scripts/generate-main-index.js ./services ./templates ./index.html
+        node scripts/generate-main-index.js
         echo "✅ Main index page updated with current service versions"
 
     - name: Generate changelog
       run: |
         echo "📋 Generating changelog from all version changes"
-        node scripts/generate-changelog.js ./services ./changelog.html
+        node scripts/generate-changelog.js
         echo "✅ Changelog generated with complete version history"
 
     - name: Commit processed documentation

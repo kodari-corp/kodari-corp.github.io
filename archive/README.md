@@ -130,6 +130,43 @@ node scripts/regenerate-from-archive.js --changes-only
 find services -name "changes-report*.json" -exec head -20 {} \;
 ```
 
+**4. 완전히 새롭게 재생성 (Clean Build)**
+
+모든 기존 데이터를 삭제하고 archive에서 완전히 새롭게 생성:
+
+```bash
+# 특정 서비스 완전 재생성
+SERVICE=gloview-api
+
+# 1단계: 기존 데이터 완전 삭제
+rm -rf services/$SERVICE
+rm -f assets/data/${SERVICE}-timeline.json
+rm -f assets/data/${SERVICE}-timeline-real.json
+
+# 2단계: Archive에서 재생성
+node scripts/regenerate-from-archive.js $SERVICE
+
+# 3단계: 서비스 인덱스 재생성
+node scripts/generate-service-index.js
+
+# 4단계: 메인 인덱스 재생성
+node scripts/generate-main-index.js
+
+# 5단계: Timeline 재생성
+node scripts/update-all-timelines.js
+
+# 6단계: 결과 확인
+ls -la services/$SERVICE/versions/
+cat services/$SERVICE/index.html | grep -o '<title>.*</title>'
+cat assets/data/${SERVICE}-timeline.json
+```
+
+**사용 시나리오:**
+- 오래된 버전 데이터가 남아있어 정리가 필요할 때
+- Timeline이나 인덱스에 잘못된 버전 정보가 남아있을 때
+- 특정 버전만 남기고 완전히 새로 시작하고 싶을 때
+- Archive에는 v0.2.1만 있는데 services에는 v0.4.x가 남아있을 때
+
 ## File Types (파일 종류)
 
 ### Required Files (필수 파일)

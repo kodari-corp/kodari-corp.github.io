@@ -1,16 +1,16 @@
 {
   "service": "gloview-api",
-  "lastUpdated": "2025-10-03T02:59:58.859Z",
+  "lastUpdated": "2025-10-03T06:55:29.786Z",
   "versions": [
     {
       "version": "v0.2.1",
       "type": "release",
-      "timestamp": "2025-10-03T02:10:37.255Z",
+      "timestamp": "2025-10-03T06:23:20.154Z",
       "changes": {
-        "breaking_changes": 0,
+        "breaking_changes": 23,
         "new_endpoints": 0,
-        "modified_endpoints": 0,
-        "risk_level": "low"
+        "modified_endpoints": 3,
+        "risk_level": "critical"
       },
       "total_endpoints": 8,
       "deployment_url": "versions/v0.2.1/",
@@ -19,7 +19,7 @@
     {
       "version": "v0.2.2",
       "type": "release",
-      "timestamp": "2025-10-03T02:46:32.835Z",
+      "timestamp": "2025-10-03T06:54:53.591Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 1,
@@ -33,7 +33,7 @@
     {
       "version": "v0.2.3",
       "type": "release",
-      "timestamp": "2025-10-03T02:49:45.216Z",
+      "timestamp": "2025-10-03T06:55:07.283Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 0,
@@ -47,7 +47,7 @@
     {
       "version": "v0.2.4",
       "type": "release",
-      "timestamp": "2025-10-03T02:52:22.072Z",
+      "timestamp": "2025-10-03T06:55:12.591Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 1,
@@ -61,7 +61,7 @@
     {
       "version": "v0.3.0",
       "type": "release",
-      "timestamp": "2025-10-03T02:56:53.458Z",
+      "timestamp": "2025-10-03T06:55:18.503Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 8,
@@ -75,24 +75,24 @@
     {
       "version": "v0.4.0",
       "type": "release",
-      "timestamp": "2025-10-03T02:58:26.362Z",
+      "timestamp": "2025-10-03T06:35:03.717Z",
       "changes": {
         "breaking_changes": 0,
-        "new_endpoints": 13,
+        "new_endpoints": 12,
         "modified_endpoints": 12,
         "risk_level": "medium"
       },
-      "total_endpoints": 31,
+      "total_endpoints": 30,
       "deployment_url": "versions/v0.4.0/",
       "documentation_url": "versions/v0.4.0/index.html"
     },
     {
       "version": "v0.4.1",
       "type": "release",
-      "timestamp": "2025-10-03T02:59:58.769Z",
+      "timestamp": "2025-10-03T06:35:27.027Z",
       "changes": {
         "breaking_changes": 0,
-        "new_endpoints": 0,
+        "new_endpoints": 1,
         "modified_endpoints": 0,
         "risk_level": "low"
       },

@@ -1,0 +1,621 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GlowView API",
+    "description": "# API Guide\nThis is a Api alpha-server for GloView App.\n\n## Common Rules\n- 인증이 필요한 API는 `Authorization: Bearer {id_token}` 헤더를 포함해야 합니다.\n\n## CDN Guide\n- CDN URL 형식: `https://{cdn_host}/{path}`\n    - cdn_host: `gloview-alpha-cdn.duckdns.org`\n- Original URL path: `/origin/{file_path}`\n    - ex: https://gloview-alpha-cdn.duckdns.org/origin/times_square.jpg\n- Thumbnail URL path: /thumb/{file_path}?w\u003d{size}\n    - Thumbnail URL의 경우 QueryString 없이 내려감\n    - size: 썸네일 크기\n    - ex: https://gloview-alpha-cdn.duckdns.org/thumb/gloview-alpha/times_square.jpg?w\u003d200\n",
+    "version": "0.2.2"
+  },
+  "servers": [
+    {
+      "url": "https://gloview-alpha.duckdns.org",
+      "description": "Development server"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ADMIN-USER",
+      "description": "ADMIN 에서 호출하는 User CRUD-API"
+    },
+    {
+      "name": "ADMIN-PHOTO",
+      "description": "ADMIN 에서 호출하는 Photo CRUD-API"
+    }
+  ],
+  "paths": {
+    "/internal/admin/users/{id}/profile": {
+      "put": {
+        "tags": [
+          "ADMIN-USER"
+        ],
+        "operationId": "modifyProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyUserProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseUnit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/admin/users": {
+      "get": {
+        "tags": [
+          "ADMIN-USER"
+        ],
+        "operationId": "findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "maximum": 9223372036854775807,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50,
+              "maximum": 9223372036854775807,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseListUserDetailsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/admin/users/{id}": {
+      "get": {
+        "tags": [
+          "ADMIN-USER"
+        ],
+        "operationId": "findById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseUserDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/admin/photos": {
+      "get": {
+        "tags": [
+          "ADMIN-PHOTO"
+        ],
+        "summary": "지역 내 사진 목록 조회",
+        "description": "지정된 영역(BoundingBox) 내의 사진 목록을 조회합니다.",
+        "operationId": "getPhotos",
+        "parameters": [
+          {
+            "name": "boundingBox",
+            "in": "query",
+            "description": "조회할 영역(범위)",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BoundingBox"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "정렬 옵션",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "VIEW_COUNT_DESC",
+              "enum": [
+                "LIKE_COUNT_ASC",
+                "LIKE_COUNT_DESC",
+                "VIEW_COUNT_ASC",
+                "VIEW_COUNT_DESC"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponsePhotosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ModifyUserProfileRequest": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "UNKNOWN"
+            ]
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date"
+          },
+          "bio": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname"
+        ]
+      },
+      "BaseResponseUnit": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "ResponseHeader": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "success"
+        ]
+      },
+      "BaseResponseListUserDetailsResult": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDetailsResult"
+            }
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "UserAuthorities": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "USER",
+              "GUEST"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "role",
+          "userId"
+        ]
+      },
+      "UserDetailsResult": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "$ref": "#/components/schemas/Users"
+          },
+          "userAuthorities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserAuthorities"
+            },
+            "uniqueItems": true
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          }
+        },
+        "required": [
+          "userAuthorities",
+          "users"
+        ]
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "UNKNOWN"
+            ]
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "createdAt",
+          "nickname",
+          "updatedAt",
+          "userId"
+        ]
+      },
+      "Users": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "providerId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "provider",
+          "providerId"
+        ]
+      },
+      "BaseResponseUserDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/UserDetailsResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "ProviderKey": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "GOOGLE",
+              "FACEBOOK",
+              "UNKNOWN"
+            ]
+          },
+          "providerId": {
+            "type": "string"
+          },
+          "userIdentifier": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "providerId",
+          "userIdentifier"
+        ]
+      },
+      "UserDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "providerKey": {
+            "$ref": "#/components/schemas/ProviderKey"
+          },
+          "email": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "USER",
+                "GUEST"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          }
+        },
+        "required": [
+          "createdAt",
+          "email",
+          "id",
+          "providerKey",
+          "roles"
+        ]
+      },
+      "BoundingBox": {
+        "type": "object",
+        "properties": {
+          "minLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "minLng": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxLng": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": [
+          "maxLat",
+          "maxLng",
+          "minLat",
+          "minLng"
+        ]
+      },
+      "BaseResponsePhotosResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ResponseHeader"
+          },
+          "body": {
+            "$ref": "#/components/schemas/PhotosResponse"
+          }
+        },
+        "required": [
+          "header"
+        ]
+      },
+      "Gps": {
+        "type": "object",
+        "properties": {
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "direction": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "PhotoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "SPHERICAL_360",
+              "PANORAMA",
+              "VIRTUAL_TOUR"
+            ]
+          },
+          "gps": {
+            "$ref": "#/components/schemas/Gps"
+          },
+          "thumbnail": {
+            "$ref": "#/components/schemas/ThumbnailResponse"
+          }
+        },
+        "required": [
+          "gps",
+          "id",
+          "thumbnail",
+          "type"
+        ]
+      },
+      "PhotosResponse": {
+        "type": "object",
+        "properties": {
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoResponse"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generatedAtEpochMilli": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "generatedAtEpochMilli",
+          "photos",
+          "totalCount"
+        ]
+      },
+      "ThumbnailResponse": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "photoId",
+          "url"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "openIdScheme": {
+        "type": "openIdConnect",
+        "description": "OpenID Connect 인증",
+        "in": "header",
+        "scheme": "bearer",
+        "bearerFormat": "JWT ID Token",
+        "openIdConnectUrl": "https://accounts.google.com/.well-known/openid-configuration"
+      }
+    }
+  }
+}

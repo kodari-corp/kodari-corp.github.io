@@ -258,12 +258,15 @@ class ServiceIndexGenerator {
     /**
      * 최신 버전 찾기
      */
+    /**
+     * 최신 버전 찾기
+     */
     findLatestVersion(versions) {
         if (versions.length === 0) return null;
 
         return versions
             .filter(v => v.type === 'release')
-            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] || versions[versions.length - 1];
+            .sort((a, b) => this.compareVersions(b.version, a.version))[0] || versions[versions.length - 1];
     }
 
     /**
@@ -440,10 +443,13 @@ class ServiceIndexGenerator {
     /**
      * 최근 버전 목록 생성
      */
+    /**
+     * 최근 버전 목록 생성
+     */
     getRecentVersions(versions, count = 4) {
         return versions
             .filter(v => v.type === 'release')
-            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .sort((a, b) => this.compareVersions(b.version, a.version))
             .slice(0, count)
             .map(v => v.version);
     }

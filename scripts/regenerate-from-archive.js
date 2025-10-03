@@ -142,8 +142,11 @@ class ArchiveRegenerator {
     /**
      * 단일 버전 재생성
      */
+    /**
+     * 단일 버전 재생성
+     */
     async regenerateVersion(versionInfo) {
-        const { service, version, archivePath, targetPath, deployType } = versionInfo;
+        const { service, version, archivePath, targetPath, deployType, previousVersion } = versionInfo;
 
         console.log(`\n🔄 Regenerating: ${service} ${version} (${deployType})`);
 
@@ -164,7 +167,7 @@ class ArchiveRegenerator {
             // 변경사항 분석
             if (!this.options.docsOnly) {
                 console.log(`   🔍 Analyzing changes`);
-                await this.analyzeChanges(service, archivePath, targetPath);
+                await this.analyzeChanges(service, archivePath, targetPath, previousVersion);
             }
 
             // HTML 문서 생성
@@ -211,10 +214,13 @@ class ArchiveRegenerator {
     /**
      * 변경사항 분석
      */
-    async analyzeChanges(serviceName, archivePath, targetPath) {
+    /**
+     * 변경사항 분석
+     */
+    async analyzeChanges(serviceName, archivePath, targetPath, previousVersion = null) {
         try {
             const analyzer = new ChangeAnalyzer(serviceName, archivePath, targetPath);
-            await analyzer.analyze();
+            await analyzer.analyze(previousVersion);
         } catch (error) {
             console.log(`   ⚠️  Change analysis failed: ${error.message}`);
             // 변경사항 분석 실패는 계속 진행 (문서 생성은 가능)
@@ -254,6 +260,12 @@ class ArchiveRegenerator {
     /**
      * 모든 서비스 재생성
      */
+    /**
+     * 모든 서비스 재생성
+     */
+    /**
+     * 모든 서비스 재생성
+     */
     async regenerateAll(targetService = null, targetVersion = null) {
         console.log('🚀 Starting full regeneration from archive');
 
@@ -278,9 +290,32 @@ class ArchiveRegenerator {
                 ? versions.filter(v => v.version === targetVersion)
                 : versions;
 
-            for (const versionInfo of filteredVersions) {
+            for (let i = 0; i < filteredVersions.length; i++) {
                 results.total++;
-                const result = await this.regenerateVersion(versionInfo);
+                const versionInfo = filteredVersions[i];
+                
+                // 이전 버전 계산: 전체 버전 목록에서 현재 버전의 위치를 찾아서 이전 버전 결정
+                let previousVersion = null;
+                if (versionInfo.deployType === 'releases') {
+                    const currentIndex = versions.findIndex(v => v.version === versionInfo.version);
+                    if (currentIndex > 0) {
+                        // 현재 버전보다 이전에 있는 releases 버전 찾기
+                        for (let j = currentIndex - 1; j >= 0; j--) {
+                            if (versions[j].deployType === 'releases') {
+                                previousVersion = versions[j].version;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // 이전 버전 정보를 versionInfo에 추가
+                const versionInfoWithPrev = {
+                    ...versionInfo,
+                    previousVersion: previousVersion
+                };
+                
+                const result = await this.regenerateVersion(versionInfoWithPrev);
 
                 if (result.success) {
                     results.success++;

@@ -141,7 +141,11 @@ class ChangeAnalyzer {
     /**
      * 변경사항 분석 실행
      */
-    async analyze() {
+    /**
+     * 변경사항 분석 실행
+     * @param {string} previousVersion - 비교할 이전 버전 (선택적, 명시하지 않으면 자동 탐지)
+     */
+    async analyze(previousVersion = null) {
         console.log(`🔍 Detecting changes for ${this.serviceName}`);
 
         // 새 버전 스펙 찾기
@@ -150,8 +154,23 @@ class ChangeAnalyzer {
         // 현재 처리 중인 버전 추출 (targetDir에서)
         const currentVersion = path.basename(this.targetDir);
 
-        // 이전 버전 찾기 (현재 버전 제외)
-        const prevVersionDir = await this.findPreviousVersion(currentVersion);
+        let prevVersionDir;
+        
+        if (previousVersion) {
+            // 명시적으로 이전 버전이 전달된 경우
+            console.log(`📌 Using explicitly provided previous version: ${previousVersion}`);
+            const explicitPrevPath = path.resolve(`services/${this.serviceName}/versions/${previousVersion}`);
+            
+            if (fsSync.existsSync(explicitPrevPath)) {
+                prevVersionDir = explicitPrevPath;
+            } else {
+                console.log(`⚠️  Explicitly provided version ${previousVersion} not found, searching automatically`);
+                prevVersionDir = await this.findPreviousVersion(currentVersion);
+            }
+        } else {
+            // 이전 버전 자동 찾기 (현재 버전 제외)
+            prevVersionDir = await this.findPreviousVersion(currentVersion);
+        }
 
         // 타겟 디렉토리 생성
         await fs.mkdir(this.targetDir, { recursive: true });
@@ -164,8 +183,10 @@ class ChangeAnalyzer {
         }
 
         // 변경사항 탐지 실행
-        console.log(`📋 Comparing with previous version: ${prevVersionDir}`);
-        return await this.runChangeDetection(prevVersionDir, this.specDir);
+        console.log(`🔬 Running grouped change analysis...`);
+        await this.runChangeDetection(prevVersionDir, this.specDir);
+
+        return { isFirstVersion: false, comparedWith: path.basename(prevVersionDir) };
     }
 
     /**

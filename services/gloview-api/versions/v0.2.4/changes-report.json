@@ -1,20 +1,174 @@
 {
-  "generatedAt": "2025-10-03T02:52:22.072Z",
+  "generatedAt": "2025-10-03T06:23:20.215Z",
   "summary": {
-    "breakingChanges": 0,
-    "newEndpoints": 1,
-    "modifiedEndpoints": 0,
-    "riskLevel": "low"
+    "breakingChanges": 21,
+    "newEndpoints": 0,
+    "modifiedEndpoints": 4,
+    "riskLevel": "critical"
   },
   "changes": {
-    "breaking": [],
-    "newEndpoints": [
+    "breaking": [
       {
-        "path": "/api/signout",
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/drafts/{id}/publish",
+        "method": "POST",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/drafts/{id}/publish",
+        "method": "POST",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/{id}",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/{id}",
         "method": "DELETE",
-        "summary": "사용자 탈퇴"
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/{id}",
+        "method": "PATCH",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/drafts/{id}",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/drafts/{id}",
+        "method": "PATCH",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/photos/{id}",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/photos/{id}",
+        "method": "DELETE",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/photos/{id}",
+        "method": "PATCH",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/drafts/{id}",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/drafts/{id}",
+        "method": "PATCH",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/public/photos",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/public/photos/{id}",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/public/photos/clusters",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/public/photos/cluster-area",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/my/published",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/photos/my/drafts",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/photos",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/photos/published",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
+      },
+      {
+        "type": "ENDPOINT_REMOVED",
+        "path": "/api/my/drafts",
+        "method": "GET",
+        "description": "엔드포인트가 삭제되었습니다"
       }
     ],
-    "modifiedEndpoints": []
+    "newEndpoints": [],
+    "modifiedEndpoints": [
+      {
+        "path": "/api/photos",
+        "method": "GET",
+        "changes": [
+          "Summary updated",
+          "Description updated"
+        ]
+      },
+      {
+        "path": "/api/photos/my",
+        "method": "GET",
+        "changes": [
+          "Summary updated",
+          "Description updated"
+        ]
+      },
+      {
+        "path": "/api/photos/clusters",
+        "method": "GET",
+        "changes": [
+          "Summary updated",
+          "Description updated"
+        ]
+      },
+      {
+        "path": "/api/photos/cluster-area",
+        "method": "GET",
+        "changes": [
+          "Summary updated",
+          "Description updated"
+        ]
+      }
+    ]
   }
 }

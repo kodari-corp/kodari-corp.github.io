@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2025-10-03T02:46:32.835Z",
+  "totalGroups": 3,
+  "groups": {
+    "all": {
+      "breaking": [],
+      "newEndpoints": [
+        {
+          "path": "/api/photos/cluster-area",
+          "method": "GET",
+          "summary": "클러스터 영역 내 사진 목록 조회"
+        }
+      ],
+      "modifiedEndpoints": [],
+      "summary": {
+        "breakingChanges": 0,
+        "newEndpoints": 1,
+        "modifiedEndpoints": 0,
+        "riskLevel": "low"
+      },
+      "groupInfo": {
+        "name": "all",
+        "displayName": "Complete API",
+        "hasOldVersion": true,
+        "newFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/incoming/gloview-api/releases/v0.2.2/apiDocs-all.yaml",
+        "oldFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/services/gloview-api/versions/v0.2.1/apiDocs-all.yaml"
+      }
+    },
+    "api": {
+      "breaking": [],
+      "newEndpoints": [
+        {
+          "path": "/api/photos/cluster-area",
+          "method": "GET",
+          "summary": "클러스터 영역 내 사진 목록 조회"
+        }
+      ],
+      "modifiedEndpoints": [],
+      "summary": {
+        "breakingChanges": 0,
+        "newEndpoints": 1,
+        "modifiedEndpoints": 0,
+        "riskLevel": "low"
+      },
+      "groupInfo": {
+        "name": "api",
+        "displayName": "Public API",
+        "hasOldVersion": true,
+        "newFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/incoming/gloview-api/releases/v0.2.2/apiDocs-api.json",
+        "oldFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/services/gloview-api/versions/v0.2.1/apiDocs-api.json"
+      }
+    },
+    "internal": {
+      "breaking": [],
+      "newEndpoints": [],
+      "modifiedEndpoints": [],
+      "summary": {
+        "breakingChanges": 0,
+        "newEndpoints": 0,
+        "modifiedEndpoints": 0,
+        "riskLevel": "low"
+      },
+      "groupInfo": {
+        "name": "internal",
+        "displayName": "Internal API",
+        "hasOldVersion": true,
+        "newFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/incoming/gloview-api/releases/v0.2.2/apiDocs-internal.json",
+        "oldFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/services/gloview-api/versions/v0.2.1/apiDocs-internal.json"
+      }
+    }
+  },
+  "summary": {
+    "totalBreakingChanges": 0,
+    "totalNewEndpoints": 2,
+    "totalModifiedEndpoints": 0,
+    "overallRiskLevel": "low"
+  }
+}

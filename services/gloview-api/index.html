@@ -15,11 +15,13 @@
     <style>
         :root {
             --primary-color: #1976d2;
+            --primary-dark: #1565c0;
             --secondary-color: #424242;
             --success-color: #4caf50;
             --warning-color: #ff9800;
             --error-color: #f44336;
             --background-color: #f5f5f5;
+            --background-secondary: #fafafa;
             --card-background: #ffffff;
             --text-primary: #212121;
             --text-secondary: #757575;
@@ -350,7 +352,7 @@
 
         .version-item {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             padding: 15px 0;
             border-bottom: 1px solid var(--border-color);
@@ -476,7 +478,7 @@
                     <span class="stat-label">Latest Version</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number" id="totalEndpoints">31</span>
+                    <span class="stat-number" id="totalEndpoints">30</span>
                     <span class="stat-label">Total Endpoints</span>
                 </div>
                 <div class="stat-item">
@@ -502,7 +504,7 @@
                         모든 엔드포인트를 포함한 전체 API 문서 (개발자/관리자용)
                     </p>
                     <div class="group-links">
-                        <a href="./latest/index.html" class="primary-btn">Latest (v0.4.0)</a>
+                        <a href="./versions/latest/index.html" class="primary-btn">Latest (v0.4.0)</a>
                         <div class="version-links">
                             
                             <a href="./versions/v0.4.0/index.html" class="version-btn">v0.4.0</a>
@@ -527,7 +529,7 @@
                         클라이언트 개발자용 공개 엔드포인트만 포함
                     </p>
                     <div class="group-links">
-                        <a href="./latest/apiDocs-api.html" class="primary-btn">Latest (v0.4.0)</a>
+                        <a href="./versions/latest/apiDocs-api.html" class="primary-btn">Latest (v0.4.0)</a>
                         <div class="version-links">
                             
                             <a href="./versions/v0.4.0/apiDocs-api.html" class="version-btn">v0.4.0</a>
@@ -552,7 +554,7 @@
                         내부 시스템용 엔드포인트 (관리자/백엔드 개발자용)
                     </p>
                     <div class="group-links">
-                        <a href="./latest/apiDocs-internal.html" class="primary-btn">Latest (v0.4.0)</a>
+                        <a href="./versions/latest/apiDocs-internal.html" class="primary-btn">Latest (v0.4.0)</a>
                         <div class="version-links">
                             
                             <a href="./versions/v0.4.0/apiDocs-internal.html" class="version-btn">v0.4.0</a>
@@ -622,11 +624,11 @@
             <div class="footer-links">
                 <a href="/" class="footer-link">← Back to Home</a>
                 <a href="#timeline" class="footer-link">View Timeline</a>
-                <a href="./latest/" class="footer-link">Latest Documentation</a>
+                <a href="./versions/latest/" class="footer-link">Latest Documentation</a>
                 <a href="https://github.com/kodari-corp/kodari-corp.github.io" class="footer-link">GitHub Repository</a>
             </div>
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                Last updated: <span id="pageLastUpdated">2025년 10월 3일 오전 02:59</span>
+                Last updated: <span id="pageLastUpdated">2025년 10월 3일 오후 03:03</span>
             </p>
         </div>
     </div>

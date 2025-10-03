@@ -234,8 +234,8 @@ class ArchiveRegenerator {
      */
     async updateLatestLink(serviceName, version) {
         const serviceDir = path.join(this.servicesDir, serviceName);
-        const latestLink = path.join(serviceDir, 'latest');
-        const versionPath = path.join('versions', version);
+        const latestLink = path.join(serviceDir, 'versions', 'latest');
+        const versionPath = version;
 
         try {
             // 기존 latest 제거

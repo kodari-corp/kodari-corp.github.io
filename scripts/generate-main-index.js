@@ -103,7 +103,7 @@ class MainIndexGenerator {
             metadata,
             changesStats,
             links: {
-                latest: `services/${serviceName}/latest/`,
+                latest: `services/${serviceName}/versions/latest/`,
                 service: `services/${serviceName}/`,
                 latestVersion: `services/${serviceName}/versions/${latestVersion}/`
             }

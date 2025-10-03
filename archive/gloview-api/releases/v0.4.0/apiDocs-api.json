@@ -3,7 +3,7 @@
   "info": {
     "title": "GlowView API",
     "description": "# API Guide\nThis is a Api alpha-server for GloView App.\n\n## Common Rules\n- 인증이 필요한 API는 `Authorization: Bearer {id_token}` 헤더를 포함해야 합니다.\n\n## CDN Guide\n- CDN URL 형식: `https://{cdn_host}/{path}`\n    - cdn_host: `gloview-alpha-cdn.duckdns.org`\n- Original URL path: `/origin/{file_path}`\n    - ex: https://gloview-alpha-cdn.duckdns.org/origin/times_square.jpg\n- Thumbnail URL path: /thumb/{file_path}?w\u003d{size}\n    - Thumbnail URL의 경우 QueryString 없이 내려감\n    - size: 썸네일 크기\n    - ex: https://gloview-alpha-cdn.duckdns.org/thumb/gloview-alpha/times_square.jpg?w\u003d200\n",
-    "version": "0.4.1"
+    "version": "0.4.0"
   },
   "servers": [
     {
@@ -546,40 +546,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/BaseResponsePhotosResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/public/photos/{id}": {
-      "get": {
-        "tags": [
-          "공개 사진"
-        ],
-        "summary": "공개 사진 상세 조회",
-        "description": "공개 사진의 상세 정보를 조회합니다. (PUBLISHED 상태인 사진만 현재 조회가 가능)",
-        "operationId": "getPublicPhotoDetail",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "공개 사진 ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "조회 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseResponsePublishedPhotoDetailResponse"
                 }
               }
             }

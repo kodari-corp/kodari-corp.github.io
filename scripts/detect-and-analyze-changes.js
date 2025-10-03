@@ -61,8 +61,9 @@ class ChangeAnalyzer {
 
     /**
      * 이전 버전 디렉토리 찾기
+     * @param {string} currentVersion - 현재 처리 중인 버전 (비교 대상에서 제외)
      */
-    async findPreviousVersion() {
+    async findPreviousVersion(currentVersion = null) {
         const latestVersionDir = path.resolve(`services/${this.serviceName}/versions`);
 
         if (!fsSync.existsSync(latestVersionDir)) {
@@ -72,14 +73,20 @@ class ChangeAnalyzer {
 
         // 모든 버전 디렉토리 찾기
         const versions = await fs.readdir(latestVersionDir, { withFileTypes: true });
-        const versionDirs = versions
+        let versionDirs = versions
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
             .sort(this.compareVersions.bind(this))
             .reverse(); // 최신 버전 우선
 
+        // 현재 버전 제외
+        if (currentVersion) {
+            console.log(`🔍 Excluding current version from comparison: ${currentVersion}`);
+            versionDirs = versionDirs.filter(v => v !== currentVersion);
+        }
+
         if (versionDirs.length === 0) {
-            console.log(`📝 No version directories found for ${this.serviceName}`);
+            console.log(`📝 No previous version directories found for ${this.serviceName}`);
             return null;
         }
 
@@ -140,8 +147,11 @@ class ChangeAnalyzer {
         // 새 버전 스펙 찾기
         const newSpec = await this.findNewSpec();
 
-        // 이전 버전 찾기
-        const prevVersionDir = await this.findPreviousVersion();
+        // 현재 처리 중인 버전 추출 (targetDir에서)
+        const currentVersion = path.basename(this.targetDir);
+
+        // 이전 버전 찾기 (현재 버전 제외)
+        const prevVersionDir = await this.findPreviousVersion(currentVersion);
 
         // 타겟 디렉토리 생성
         await fs.mkdir(this.targetDir, { recursive: true });

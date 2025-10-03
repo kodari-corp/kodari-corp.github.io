@@ -1,14 +1,20 @@
 {
-  "generatedAt": "2025-10-03T02:59:58.769Z",
+  "generatedAt": "2025-10-03T05:55:07.689Z",
   "totalGroups": 3,
   "groups": {
     "all": {
       "breaking": [],
-      "newEndpoints": [],
+      "newEndpoints": [
+        {
+          "path": "/api/public/photos/{id}",
+          "method": "GET",
+          "summary": "공개 사진 상세 조회"
+        }
+      ],
       "modifiedEndpoints": [],
       "summary": {
         "breakingChanges": 0,
-        "newEndpoints": 0,
+        "newEndpoints": 1,
         "modifiedEndpoints": 0,
         "riskLevel": "low"
       },
@@ -16,17 +22,23 @@
         "name": "all",
         "displayName": "Complete API",
         "hasOldVersion": true,
-        "newFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/incoming/gloview-api/releases/v0.4.1/apiDocs-all.yaml",
-        "oldFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/services/gloview-api/versions/v0.4.0/apiDocs-all.yaml"
+        "newFilePath": "/Users/jay.axz/IdeaProjects/Jay/apidocs/archive/gloview-api/releases/v0.4.1/apiDocs-all.yaml",
+        "oldFilePath": "/Users/jay.axz/IdeaProjects/Jay/apidocs/services/gloview-api/versions/v0.4.0/apiDocs-all.yaml"
       }
     },
     "api": {
       "breaking": [],
-      "newEndpoints": [],
+      "newEndpoints": [
+        {
+          "path": "/api/public/photos/{id}",
+          "method": "GET",
+          "summary": "공개 사진 상세 조회"
+        }
+      ],
       "modifiedEndpoints": [],
       "summary": {
         "breakingChanges": 0,
-        "newEndpoints": 0,
+        "newEndpoints": 1,
         "modifiedEndpoints": 0,
         "riskLevel": "low"
       },
@@ -34,8 +46,8 @@
         "name": "api",
         "displayName": "Public API",
         "hasOldVersion": true,
-        "newFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/incoming/gloview-api/releases/v0.4.1/apiDocs-api.json",
-        "oldFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/services/gloview-api/versions/v0.4.0/apiDocs-api.json"
+        "newFilePath": "/Users/jay.axz/IdeaProjects/Jay/apidocs/archive/gloview-api/releases/v0.4.1/apiDocs-api.json",
+        "oldFilePath": "/Users/jay.axz/IdeaProjects/Jay/apidocs/services/gloview-api/versions/v0.4.0/apiDocs-api.json"
       }
     },
     "internal": {
@@ -52,14 +64,14 @@
         "name": "internal",
         "displayName": "Internal API",
         "hasOldVersion": true,
-        "newFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/incoming/gloview-api/releases/v0.4.1/apiDocs-internal.json",
-        "oldFilePath": "/home/runner/work/kodari-corp.github.io/kodari-corp.github.io/services/gloview-api/versions/v0.4.0/apiDocs-internal.json"
+        "newFilePath": "/Users/jay.axz/IdeaProjects/Jay/apidocs/archive/gloview-api/releases/v0.4.1/apiDocs-internal.json",
+        "oldFilePath": "/Users/jay.axz/IdeaProjects/Jay/apidocs/services/gloview-api/versions/v0.4.0/apiDocs-internal.json"
       }
     }
   },
   "summary": {
     "totalBreakingChanges": 0,
-    "totalNewEndpoints": 0,
+    "totalNewEndpoints": 2,
     "totalModifiedEndpoints": 0,
     "overallRiskLevel": "low"
   }

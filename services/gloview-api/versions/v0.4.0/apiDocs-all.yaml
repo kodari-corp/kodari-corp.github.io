@@ -17,7 +17,7 @@ info:
         - Thumbnail URL의 경우 QueryString 없이 내려감
         - size: 썸네일 크기
         - ex: https://gloview-alpha-cdn.duckdns.org/thumb/gloview-alpha/times_square.jpg?w=200
-  version: 0.4.1
+  version: 0.4.0
 servers:
 - url: https://gloview-alpha.duckdns.org
   description: Development server
@@ -520,28 +520,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponsePhotosResponse"
-  /api/public/photos/{id}:
-    get:
-      tags:
-      - 공개 사진
-      summary: 공개 사진 상세 조회
-      description: 공개 사진의 상세 정보를 조회합니다. (PUBLISHED 상태인 사진만 현재 조회가 가능)
-      operationId: getPublicPhotoDetail
-      parameters:
-      - name: id
-        in: path
-        description: 공개 사진 ID
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: 조회 성공
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BaseResponsePublishedPhotoDetailResponse"
   /api/public/photos/clusters:
     get:
       tags:

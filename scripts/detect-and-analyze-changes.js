@@ -156,6 +156,13 @@ class ChangeAnalyzer {
 
         let prevVersionDir;
         
+        // 첫 번째 버전 명시적 체크
+        if (previousVersion === 'none') {
+            console.log(`📝 First version for ${this.serviceName} - no comparison possible`);
+            await this.createFirstVersionReport();
+            return { isFirstVersion: true };
+        }
+        
         if (previousVersion) {
             // 명시적으로 이전 버전이 전달된 경우
             console.log(`📌 Using explicitly provided previous version: ${previousVersion}`);

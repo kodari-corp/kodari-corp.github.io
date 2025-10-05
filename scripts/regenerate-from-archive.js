@@ -306,6 +306,9 @@ class ArchiveRegenerator {
                                 break;
                             }
                         }
+                    } else if (currentIndex === 0) {
+                        // 첫 번째 버전 - 명시적으로 'none' 전달
+                        previousVersion = 'none';
                     }
                 }
                 

@@ -1,16 +1,16 @@
 {
   "service": "gloview-api",
-  "lastUpdated": "2025-10-03T06:55:29.786Z",
+  "lastUpdated": "2025-10-05T23:36:28.068Z",
   "versions": [
     {
       "version": "v0.2.1",
       "type": "release",
-      "timestamp": "2025-10-03T06:23:20.154Z",
+      "timestamp": "2025-10-05T23:36:14.394Z",
       "changes": {
-        "breaking_changes": 23,
-        "new_endpoints": 0,
-        "modified_endpoints": 3,
-        "risk_level": "critical"
+        "breaking_changes": 0,
+        "new_endpoints": "unknown",
+        "modified_endpoints": 0,
+        "risk_level": "low"
       },
       "total_endpoints": 8,
       "deployment_url": "versions/v0.2.1/",
@@ -19,7 +19,7 @@
     {
       "version": "v0.2.2",
       "type": "release",
-      "timestamp": "2025-10-03T06:54:53.591Z",
+      "timestamp": "2025-10-05T23:36:14.432Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 1,
@@ -33,7 +33,7 @@
     {
       "version": "v0.2.3",
       "type": "release",
-      "timestamp": "2025-10-03T06:55:07.283Z",
+      "timestamp": "2025-10-05T23:36:14.451Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 0,
@@ -47,7 +47,7 @@
     {
       "version": "v0.2.4",
       "type": "release",
-      "timestamp": "2025-10-03T06:55:12.591Z",
+      "timestamp": "2025-10-05T23:36:14.470Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 1,
@@ -61,7 +61,7 @@
     {
       "version": "v0.3.0",
       "type": "release",
-      "timestamp": "2025-10-03T06:55:18.503Z",
+      "timestamp": "2025-10-05T23:36:14.485Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 8,
@@ -75,7 +75,7 @@
     {
       "version": "v0.4.0",
       "type": "release",
-      "timestamp": "2025-10-03T06:35:03.717Z",
+      "timestamp": "2025-10-05T23:36:14.512Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 12,
@@ -89,7 +89,7 @@
     {
       "version": "v0.4.1",
       "type": "release",
-      "timestamp": "2025-10-03T06:35:27.027Z",
+      "timestamp": "2025-10-05T23:36:14.526Z",
       "changes": {
         "breaking_changes": 0,
         "new_endpoints": 1,

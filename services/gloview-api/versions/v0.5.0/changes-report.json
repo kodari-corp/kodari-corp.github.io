@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2025-12-16T12:52:22.484Z",
+  "summary": {
+    "breakingChanges": 0,
+    "newEndpoints": 1,
+    "modifiedEndpoints": 0,
+    "riskLevel": "low"
+  },
+  "changes": {
+    "breaking": [],
+    "newEndpoints": [
+      {
+        "path": "/api/public/photos/bulk",
+        "method": "GET",
+        "summary": "공개 사진 대량 조회"
+      }
+    ],
+    "modifiedEndpoints": []
+  }
+}

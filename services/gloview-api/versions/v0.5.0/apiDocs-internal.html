@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>gloview-api API Documentation - v0.5.0</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Change Summary Panel - 기본 Redoc 스타일과 유사하게 */
+    .change-summary {
+      background: #fafafa;
+      border: 1px solid #e1e1e1;
+      border-radius: 4px;
+      margin: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      font-family: Roboto, sans-serif;
+    }
+
+    .change-summary-title {
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 15px;
+      border-bottom: 1px solid #e1e1e1;
+      padding-bottom: 10px;
+    }
+
+    .change-type {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 15px 0 8px;
+      padding: 6px 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .change-type.breaking {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 3px solid #c62828;
+    }
+
+    .change-type.new {
+      background: #e8f5e8;
+      color: #2e7d32;
+      border-left: 3px solid #2e7d32;
+    }
+
+    .change-type.modified {
+      background: #fff3e0;
+      color: #ef6c00;
+      border-left: 3px solid #ef6c00;
+    }
+
+    .change-item {
+      padding: 6px 0;
+      color: #666;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .change-item strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .service-index-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 15px;
+      padding: 8px 12px;
+      background: #f5f5f5;
+      color: #1976d2;
+      text-decoration: none;
+      border-radius: 3px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+
+    .service-index-link:hover {
+      background: #e3f2fd;
+    }
+
+    .no-changes {
+      text-align: center;
+      color: #999;
+      font-style: italic;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+<!-- Change Summary Panel -->
+<div class="change-summary" id="changeSummary">
+  <h3 class="change-summary-title">What's New in v0.5.0</h3>
+  <div id="changeDetails">
+    <!-- Populated by JavaScript from changes-report.json -->
+  </div>
+  <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e1e1e1;">
+    <a href="../../" style="color: #1976d2; text-decoration: none; font-size: 13px; font-weight: 500;">
+      ← gloview-api 서비스 인덱스로 돌아가기
+    </a>
+  </div>
+</div>
+
+<!-- Redoc Container -->
+<div id="redoc-container"></div>
+
+<script src="https://cdn.redocly.com/redoc/latest/bundles/redoc.standalone.js"></script>
+<script>
+  // Initialize Redoc
+  Redoc.init('apiDocs-internal.json', {
+    theme: {
+      colors: { primary: { main: '#667eea' } }
+    }
+  }, document.getElementById('redoc-container'));
+
+  // Load and display changes
+  async function loadChanges() {
+    try {
+      // 먼저 grouped 변경사항을 시도
+      const groupedResponse = await fetch('changes-report-grouped.json');
+      if (groupedResponse.ok) {
+        const groupedData = await groupedResponse.json();
+        displayGroupedChanges(groupedData);
+        return;
+      }
+    } catch (error) {
+      console.log('No grouped changes data, trying legacy format');
+    }
+    
+    try {
+      // 레거시 변경사항 로드
+      const response = await fetch('changes-report.json');
+      const changesData = await response.json();
+      displayChanges(changesData);
+    } catch (error) {
+      console.log('No changes data available');
+      document.getElementById('changeSummary').style.display = 'none';
+    }
+  }
+
+  function displayGroupedChanges(groupedData) {
+    // 현재 파일명에서 그룹 이름 추출
+    const currentPath = window.location.pathname;
+    const fileName = currentPath.split('/').pop().replace('.html', '');
+    
+    let groupName = 'all'; // 기본값
+    if (fileName.includes('apiDocs-api')) {
+      groupName = 'api';
+    } else if (fileName.includes('apiDocs-internal')) {
+      groupName = 'internal';
+    } else if (fileName.includes('apiDocs-all')) {
+      groupName = 'all';
+    } else if (fileName === 'index') {
+      groupName = 'all'; // index.html은 보통 all 그룹
+    }
+    
+    const groupData = groupedData.groups && groupedData.groups[groupName];
+    if (!groupData) {
+      console.log(`No data found for group: ${groupName}`);
+      document.getElementById('changeSummary').style.display = 'none';
+      return;
+    }
+    
+    displayChanges(groupData);
+  }
+
+  function displayChanges(changesData) {
+    console.log('=== displayChanges 호출 ===');
+    console.log('changesData:', changesData);
+
+    const summary = changesData.summary || {};
+    console.log('summary:', summary);
+
+    // 그룹화된 데이터 구조에 맞게 수정
+    const breaking = changesData.breaking || [];
+    const newEndpoints = changesData.newEndpoints || [];
+    const modifiedEndpoints = changesData.modifiedEndpoints || [];
+
+    console.log('breaking:', breaking);
+    console.log('newEndpoints:', newEndpoints);
+    console.log('modifiedEndpoints:', modifiedEndpoints);
+
+    let html = '';
+
+    if (summary.breakingChanges > 0 || summary.newEndpoints > 0 || summary.modifiedEndpoints > 0) {
+      console.log('변경사항이 있습니다. HTML 생성 중...');
+
+      // Breaking Changes
+      if (breaking && breaking.length > 0) {
+        html += '<div class="change-type breaking">🚨 Breaking Changes</div>';
+        breaking.slice(0, 5).forEach(change => {
+          html += `<div class="change-item">• <strong>${change.method?.toUpperCase() || ''}</strong> ${change.path || ''} - ${change.description || change.summary || ''}</div>`;
+        });
+      }
+
+      // New Endpoints
+      if (newEndpoints && newEndpoints.length > 0) {
+        console.log('새로운 엔드포인트 HTML 생성 중...');
+        html += '<div class="change-type new">✨ New Endpoints</div>';
+        newEndpoints.slice(0, 5).forEach(endpoint => {
+          const endpointHtml = `<div class="change-item">• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path} - ${endpoint.summary}</div>`;
+          console.log('엔드포인트 HTML:', endpointHtml);
+          html += endpointHtml;
+        });
+      }
+
+      // Modified Endpoints
+      if (modifiedEndpoints && modifiedEndpoints.length > 0) {
+        html += '<div class="change-type modified">🔄 Modified Endpoints</div>';
+        modifiedEndpoints.slice(0, 5).forEach(endpoint => {
+          html += `<div class="change-item">• <strong>${endpoint.method.toUpperCase()}</strong> ${endpoint.path} - ${endpoint.summary || endpoint.changes?.join(', ') || ''}</div>`;
+        });
+      }
+
+      // Service Index Link
+      html += `
+        <a href="../../" class="service-index-link">
+          📊 더 상세한 버전 비교 및 타임라인 보기 →
+        </a>
+      `;
+
+    } else {
+      console.log('변경사항이 없습니다.');
+      html = '<div class="no-changes">이 버전에는 변경사항이 없습니다.</div>';
+    }
+
+    console.log('생성된 HTML:', html);
+    const changeDetailsElement = document.getElementById('changeDetails');
+    console.log('changeDetails 엘리먼트:', changeDetailsElement);
+
+    if (changeDetailsElement) {
+      changeDetailsElement.innerHTML = html;
+      console.log('HTML이 성공적으로 삽입되었습니다.');
+      console.log('삽입된 내용:', changeDetailsElement.innerHTML);
+    } else {
+      console.error('changeDetails 엘리먼트를 찾을 수 없습니다!');
+    }
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function () {
+    loadChanges();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2025-12-26T06:53:01.740Z",
+  "summary": {
+    "breakingChanges": 0,
+    "newEndpoints": 14,
+    "modifiedEndpoints": 1,
+    "riskLevel": "low"
+  },
+  "changes": {
+    "breaking": [],
+    "newEndpoints": [
+      {
+        "path": "/api/upload/publish",
+        "method": "POST",
+        "summary": "Photo 생성 및 공개"
+      },
+      {
+        "path": "/api/photo-requests/{requestId}/submissions",
+        "method": "POST",
+        "summary": "촬영 의뢰에 사진 제출"
+      },
+      {
+        "path": "/api/my/photo-requests",
+        "method": "GET",
+        "summary": "내 촬영 의뢰 목록 조회"
+      },
+      {
+        "path": "/api/my/photo-requests",
+        "method": "POST",
+        "summary": "촬영 의뢰 생성"
+      },
+      {
+        "path": "/api/my/photo-requests/{requestId}/submissions/{submissionId}/review",
+        "method": "POST",
+        "summary": "제출 검토 (채택/거절)"
+      },
+      {
+        "path": "/api/my/photo-requests/{id}/close",
+        "method": "POST",
+        "summary": "촬영 의뢰 마감"
+      },
+      {
+        "path": "/api/my/photo-requests/{id}",
+        "method": "DELETE",
+        "summary": "촬영 의뢰 취소"
+      },
+      {
+        "path": "/api/my/photo-requests/{id}",
+        "method": "PATCH",
+        "summary": "촬영 의뢰 수정"
+      },
+      {
+        "path": "/api/photo-requests",
+        "method": "GET",
+        "summary": "촬영 의뢰 목록 조회 (지도용)"
+      },
+      {
+        "path": "/api/photo-requests/{id}",
+        "method": "GET",
+        "summary": "촬영 의뢰 상세 조회"
+      },
+      {
+        "path": "/api/photo-requests/clusters",
+        "method": "GET",
+        "summary": "촬영 의뢰 클러스터 조회"
+      },
+      {
+        "path": "/api/my/submissions",
+        "method": "GET",
+        "summary": "내 제출 목록 조회"
+      },
+      {
+        "path": "/api/my/photo-requests/{id}/submissions",
+        "method": "GET",
+        "summary": "의뢰에 대한 제출 목록 조회"
+      },
+      {
+        "path": "/api/photo-requests/{requestId}/submissions/{submissionId}",
+        "method": "DELETE",
+        "summary": "사진 제출 철회"
+      }
+    ],
+    "modifiedEndpoints": [
+      {
+        "path": "/api/upload/complete",
+        "method": "POST",
+        "changes": [
+          "Summary updated",
+          "Description updated"
+        ]
+      }
+    ]
+  }
+}

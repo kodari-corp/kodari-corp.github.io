@@ -239,6 +239,34 @@
             
             <div class="version-entry">
                 <div class="version-header">
+                    <h2>📸 GloView API v0.8.0</h2>
+                    <div class="version-meta">
+                        <span class="date">📅 2025. 12. 26.</span>
+                        <span class="risk-level">🟢 low</span>
+                        <span class="deploy-type">🚀 release</span>
+                    </div>
+                </div>
+                    <div class="changes-section">
+                        <div class="change-type new">✨ New Endpoints</div><div class="change-item">• <strong>POST</strong> /api/upload/publish - Photo 생성 및 공개</div><div class="change-item">• <strong>POST</strong> /api/photo-requests/{requestId}/submissions - 촬영 의뢰에 사진 제출</div><div class="change-item">• <strong>GET</strong> /api/my/photo-requests - 내 촬영 의뢰 목록 조회</div><div class="change-item">• <strong>POST</strong> /api/my/photo-requests - 촬영 의뢰 생성</div><div class="change-item">• <strong>POST</strong> /api/my/photo-requests/{requestId}/submissions/{submissionId}/review - 제출 검토 (채택/거절)</div><div class="change-item">• <strong>POST</strong> /api/my/photo-requests/{id}/close - 촬영 의뢰 마감</div><div class="change-item">• <strong>DELETE</strong> /api/my/photo-requests/{id} - 촬영 의뢰 취소</div><div class="change-item">• <strong>PATCH</strong> /api/my/photo-requests/{id} - 촬영 의뢰 수정</div><div class="change-item">• <strong>GET</strong> /api/photo-requests - 촬영 의뢰 목록 조회 (지도용)</div><div class="change-item">• <strong>GET</strong> /api/photo-requests/{id} - 촬영 의뢰 상세 조회</div><div class="change-item">• <strong>GET</strong> /api/photo-requests/clusters - 촬영 의뢰 클러스터 조회</div><div class="change-item">• <strong>GET</strong> /api/my/submissions - 내 제출 목록 조회</div><div class="change-item">• <strong>GET</strong> /api/my/photo-requests/{id}/submissions - 의뢰에 대한 제출 목록 조회</div><div class="change-item">• <strong>DELETE</strong> /api/photo-requests/{requestId}/submissions/{submissionId} - 사진 제출 철회</div></div>
+                    <div class="changes-section">
+                        <div class="change-type modified">🔄 Modified Endpoints</div><div class="change-item">• <strong>POST</strong> /api/upload/complete - undefined</div></div>
+                <div class="summary-section">
+                    <div class="summary-stats">
+                        <span class="stat">📊 Summary: </span>
+                        <span class="stat-item">14 new</span>
+                        <span class="stat-item">1 modified</span>
+                        <span class="stat-item">0 breaking</span>
+                    </div>
+                    <div class="github-link">
+                        <a href="https://github.com/kodari-corp/gloview/commit/d450ebc45fc9177efc457a22761d1dc8709b92e6" target="_blank" rel="noopener">
+                            🔗 GitHub Commit: d450ebc
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="version-entry">
+                <div class="version-header">
                     <h2>📸 GloView API v0.5.0</h2>
                     <div class="version-meta">
                         <span class="date">📅 2025. 12. 16.</span>
@@ -458,7 +486,7 @@
         </div>
 
         <div class="footer">
-            <p>Last updated: 2025. 12. 16. 오후 12:52:22 | Generated automatically from API changes</p>
+            <p>Last updated: 2025. 12. 26. 오전 6:53:02 | Generated automatically from API changes</p>
         </div>
     </div>
 </body>

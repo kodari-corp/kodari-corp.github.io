@@ -1,6 +1,6 @@
 {
   "service": "gloview-api",
-  "lastUpdated": "2025-12-26T06:53:01.834Z",
+  "lastUpdated": "2025-12-28T14:23:40.999Z",
   "versions": [
     {
       "version": "v0.2.1",
@@ -127,6 +127,20 @@
       "total_endpoints": 45,
       "deployment_url": "versions/v0.8.0/",
       "documentation_url": "versions/v0.8.0/index.html"
+    },
+    {
+      "version": "v0.9.0",
+      "type": "release",
+      "timestamp": "2025-12-28T14:23:40.906Z",
+      "changes": {
+        "breaking_changes": 0,
+        "new_endpoints": 3,
+        "modified_endpoints": 0,
+        "risk_level": "low"
+      },
+      "total_endpoints": 48,
+      "deployment_url": "versions/v0.9.0/",
+      "documentation_url": "versions/v0.9.0/index.html"
     }
   ]
 }

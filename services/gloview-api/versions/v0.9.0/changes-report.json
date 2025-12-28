@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2025-12-28T14:23:40.906Z",
+  "summary": {
+    "breakingChanges": 0,
+    "newEndpoints": 3,
+    "modifiedEndpoints": 0,
+    "riskLevel": "low"
+  },
+  "changes": {
+    "breaking": [],
+    "newEndpoints": [
+      {
+        "path": "/api/photos/{photoId}/like",
+        "method": "POST",
+        "summary": "좋아요 토글"
+      },
+      {
+        "path": "/api/photos/{photoId}/dislike",
+        "method": "POST",
+        "summary": "싫어요 토글"
+      },
+      {
+        "path": "/api/photos/{photoId}/engagement",
+        "method": "GET",
+        "summary": "사진 engagement 정보 조회"
+      }
+    ],
+    "modifiedEndpoints": []
+  }
+}
